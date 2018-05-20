@@ -278,7 +278,7 @@ class ProcessData {
                         val productToBrandDetectRel: Relationship = product.createRelationshipTo(it, RelationshipType { Relations.CATEGORYDETECT_HAS_PRODUCT.toString() })
                         productToBrandDetectRel.setProperty("DetectCount", wordCount)
 
-
+                        count += wordCount
                     }
 
                     val rel: Relationship = product.createRelationshipTo(brand, RelationshipType { Relations.RP_CATEGORY_HAS_PRODUCT.toString() })
