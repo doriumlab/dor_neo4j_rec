@@ -121,26 +121,23 @@ class ProcessData {
 
     @Procedure(name = "adt.defineProduct", mode = Mode.WRITE)
     fun defineProduct(@Name("HashTitle") hashTitle: String) {
-        val doneBrand: Boolean = if (defineProductBrand(hashTitle) != null) true else false
+        defineProductBrand(hashTitle)
         val Category = defineProductCategory(hashTitle)
-        val doneFact: Boolean = defineProductFact(hashTitle, Category)
-        val doneCategory: Boolean = if (Category != null) true else false
-
-
+        defineProductFact(hashTitle, Category)
     }
 
     @Procedure(name = "adt.defineAllProducts", mode = Mode.WRITE)
     fun defineAllProducts() {
-        var productNodes: ResourceIterator<Node> = db.findNodes(EngineLable.productLabel())
-        var startTime = System.currentTimeMillis()
+        val productNodes: ResourceIterator<Node> = db.findNodes(EngineLable.productLabel())
+        val startTime = System.currentTimeMillis()
 
         productNodes.forEach {
             defineProductBrand(it.getProperty("HashTitle").toString());
-            var cat = defineProductCategory(it.getProperty("HashTitle").toString());
+            val cat = defineProductCategory(it.getProperty("HashTitle").toString());
             defineProductFact(it.getProperty("HashTitle").toString(), cat)
         }
-        var endTime = System.currentTimeMillis()
-        var duration = (endTime - startTime)
+        val endTime = System.currentTimeMillis()
+        val duration = (endTime - startTime)
 
         log.info(duration.toString())
 
@@ -392,14 +389,10 @@ class ProcessData {
 
 }
 
-class DetectCountViewModel {
-    constructor(Count: Int, Detect: Node) {
-        detect = Detect
-        count = Count
-    }
+class DetectCountViewModel(Count: Int, Detect: Node) {
 
-    var detect: Node
-    var count: Int
+    var detect: Node = Detect
+    var count: Int = Count
 }
 
 class EngineLable {
