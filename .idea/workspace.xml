@@ -3,6 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="77dd0837-d925-4bb7-baa7-7990c817fb33" name="Default" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/nansp.iml" beforeDir="false" afterPath="$PROJECT_DIR$/nansp.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/net/dor/neo4j/ProcessData.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/net/dor/neo4j/ProcessData.kt" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/target/" />
@@ -18,7 +19,7 @@
       <file leaf-file-name="pom.xml" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/pom.xml">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1">
+            <state relative-caret-position="136">
               <caret line="8" column="35" selection-start-line="8" selection-start-column="35" selection-end-line="8" selection-end-column="35" />
             </state>
           </provider>
@@ -27,18 +28,13 @@
       <file leaf-file-name="ProcessData.kt" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/net/dor/neo4j/ProcessData.kt">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="333">
-              <caret line="371" column="9" selection-start-line="371" selection-start-column="9" selection-end-line="371" selection-end-column="9" />
+            <state relative-caret-position="187">
+              <caret line="11" column="49" lean-forward="true" selection-start-line="11" selection-start-column="49" selection-end-line="11" selection-end-column="49" />
               <folding>
-                <element signature="e#19#895#0" expanded="true" />
                 <element signature="n#!!block;n#Relations#0;n#!!block;n#ProcessData#0" />
-                <element signature="n#!!block;n#sayHello#0;n#!!block;n#ProcessData#0" />
                 <element signature="n#!!block;n#countProductDesc#0;n#!!block;n#ProcessData#0" />
                 <element signature="n#!!block;n#createProduct#0;n#!!block;n#ProcessData#0" />
                 <element signature="n#!!block;n#defineProductBrand#0;n#!!block;n#ProcessData#0" />
-                <element signature="e#9278#10722#0" />
-                <element signature="n#!!block;n#wordCount#0;n#!!block;n#ProcessData#0" />
-                <element signature="n#!!block;n#EngineLable#0" />
               </folding>
             </state>
           </provider>
@@ -79,7 +75,7 @@
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="-9" />
+    <option name="x" value="-10" />
     <option name="width" value="1350" />
     <option name="height" value="690" />
   </component>
@@ -89,7 +85,6 @@
     </navigator>
     <panes>
       <pane id="Scope" />
-      <pane id="AndroidView" />
       <pane id="PackagesPane" />
       <pane id="ProjectPane">
         <subPane>
@@ -98,10 +93,37 @@
               <item name="dor_neo4j_rec" type="b2602c69:ProjectViewProjectNode" />
               <item name="dor_neo4j_rec" type="462c0819:PsiDirectoryNode" />
             </path>
+            <path>
+              <item name="dor_neo4j_rec" type="b2602c69:ProjectViewProjectNode" />
+              <item name="dor_neo4j_rec" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="dor_neo4j_rec" type="b2602c69:ProjectViewProjectNode" />
+              <item name="dor_neo4j_rec" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="dor_neo4j_rec" type="b2602c69:ProjectViewProjectNode" />
+              <item name="dor_neo4j_rec" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="462c0819:PsiDirectoryNode" />
+              <item name="net" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="dor_neo4j_rec" type="b2602c69:ProjectViewProjectNode" />
+              <item name="dor_neo4j_rec" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="462c0819:PsiDirectoryNode" />
+              <item name="net" type="462c0819:PsiDirectoryNode" />
+              <item name="neo4j" type="462c0819:PsiDirectoryNode" />
+            </path>
           </expand>
           <select />
         </subPane>
       </pane>
+      <pane id="AndroidView" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -183,6 +205,7 @@
       <workItem from="1526107664273" duration="94996000" />
       <workItem from="1526544501489" duration="201000" />
       <workItem from="1526546952235" duration="17569000" />
+      <workItem from="1526906714277" duration="2340000" />
     </task>
     <task id="LOCAL-00001" summary="add Define Product Category Method">
       <created>1525951751116</created>
@@ -209,41 +232,41 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="118518000" />
+    <option name="totallyTimeSpent" value="120858000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-7" y="-7" width="1481" height="878" extended-state="6" />
+    <frame x="-6" y="-6" width="1293" height="693" extended-state="6" />
     <editor active="true" />
     <layout>
       <window_info anchor="right" id="Palette" order="3" />
       <window_info anchor="bottom" id="TODO" order="6" />
-      <window_info anchor="bottom" id="Messages" order="7" weight="0.328877" />
-      <window_info anchor="right" id="Palette&#9;" order="3" />
+      <window_info anchor="right" id="Palette&#9;" order="4" />
       <window_info id="Image Layers" order="2" />
       <window_info anchor="bottom" id="Java Enterprise" order="7" />
-      <window_info anchor="right" id="Capture Analysis" order="3" />
-      <window_info anchor="bottom" id="Event Log" order="7" sideWeight="0.50035185" side_tool="true" weight="0.328877" />
-      <window_info anchor="right" id="Maven Projects" order="3" />
-      <window_info anchor="bottom" id="Database Changes" order="7" show_stripe_button="false" />
-      <window_info anchor="bottom" id="Version Control" order="7" weight="0.328877" />
+      <window_info anchor="right" id="Capture Analysis" order="5" />
+      <window_info anchor="bottom" id="Event Log" order="8" sideWeight="0.50035185" side_tool="true" weight="0.328877" />
+      <window_info anchor="right" id="Maven Projects" order="6" />
+      <window_info anchor="bottom" id="Database Changes" order="9" show_stripe_button="false" />
       <window_info anchor="bottom" id="Run" order="2" />
-      <window_info active="true" anchor="bottom" id="Terminal" order="7" sideWeight="0.49964812" visible="true" weight="0.26737967" />
+      <window_info anchor="bottom" id="Version Control" order="10" weight="0.328877" />
+      <window_info active="true" anchor="right" id="Terminal" order="9" sideWeight="0.49964812" visible="true" weight="0.22482435" />
       <window_info id="Capture Tool" order="2" />
       <window_info id="Designer" order="2" />
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.25686136" />
-      <window_info anchor="right" id="Database" order="3" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.18891491" />
+      <window_info anchor="right" id="Database" order="7" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info id="UI Designer" order="2" />
-      <window_info anchor="right" id="Theme Preview" order="3" />
-      <window_info id="Favorites" order="2" side_tool="true" />
+      <window_info anchor="right" id="Theme Preview" order="8" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
+      <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Find" order="1" />
+      <window_info anchor="bottom" id="Messages" order="11" weight="0.328877" />
     </layout>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -266,6 +289,26 @@
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/pom.xml">
       <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="136">
+          <caret line="8" column="35" selection-start-line="8" selection-start-column="35" selection-end-line="8" selection-end-column="35" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/net/dor/neo4j/ProcessData.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3723">
+          <caret line="371" column="9" selection-start-line="371" selection-start-column="9" selection-end-line="371" selection-end-column="9" />
+          <folding>
+            <element signature="n#!!block;n#Relations#0;n#!!block;n#ProcessData#0" />
+            <element signature="n#!!block;n#countProductDesc#0;n#!!block;n#ProcessData#0" />
+            <element signature="n#!!block;n#createProduct#0;n#!!block;n#ProcessData#0" />
+            <element signature="n#!!block;n#defineProductBrand#0;n#!!block;n#ProcessData#0" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/pom.xml">
+      <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="176">
           <caret line="8" column="35" selection-start-line="8" selection-start-column="35" selection-end-line="8" selection-end-column="35" />
         </state>
@@ -276,15 +319,10 @@
         <state relative-caret-position="2618">
           <caret line="140" column="40" selection-start-line="140" selection-start-column="40" selection-end-line="140" selection-end-column="40" />
           <folding>
-            <element signature="e#19#895#0" expanded="true" />
             <element signature="n#!!block;n#Relations#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#sayHello#0;n#!!block;n#ProcessData#0" />
             <element signature="n#!!block;n#countProductDesc#0;n#!!block;n#ProcessData#0" />
             <element signature="n#!!block;n#createProduct#0;n#!!block;n#ProcessData#0" />
             <element signature="n#!!block;n#defineProductBrand#0;n#!!block;n#ProcessData#0" />
-            <element signature="e#9278#10722#0" />
-            <element signature="n#!!block;n#wordCount#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#EngineLable#0" />
           </folding>
         </state>
       </provider>
@@ -301,15 +339,10 @@
         <state relative-caret-position="3146">
           <caret line="143" lean-forward="true" selection-start-line="143" selection-end-line="143" />
           <folding>
-            <element signature="e#19#895#0" expanded="true" />
             <element signature="n#!!block;n#Relations#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#sayHello#0;n#!!block;n#ProcessData#0" />
             <element signature="n#!!block;n#countProductDesc#0;n#!!block;n#ProcessData#0" />
             <element signature="n#!!block;n#createProduct#0;n#!!block;n#ProcessData#0" />
             <element signature="n#!!block;n#defineProductBrand#0;n#!!block;n#ProcessData#0" />
-            <element signature="e#9278#10722#0" />
-            <element signature="n#!!block;n#wordCount#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#EngineLable#0" />
           </folding>
         </state>
       </provider>
@@ -323,34 +356,23 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/nansp/pom.xml" />
     <entry file="file://$PROJECT_DIR$/nansp/src/main/net/dor/neo4j/ProcessData.kt" />
-    <entry file="jar://$MAVEN_REPOSITORY$/org/neo4j/neo4j-graphdb-api/3.3.4/neo4j-graphdb-api-3.3.4.jar!/org/neo4j/graphdb/RelationshipType.class">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="110">
-          <caret line="8" column="3" lean-forward="true" selection-start-line="8" selection-start-column="3" selection-end-line="8" selection-end-column="3" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="jar://$MAVEN_REPOSITORY$/org/neo4j/neo4j-graphdb-api/3.3.4/neo4j-graphdb-api-3.3.4.jar!/org/neo4j/graphdb/RelationshipType.class" />
     <entry file="file://$PROJECT_DIR$/pom.xml">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1">
+        <state relative-caret-position="136">
           <caret line="8" column="35" selection-start-line="8" selection-start-column="35" selection-end-line="8" selection-end-column="35" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/net/dor/neo4j/ProcessData.kt">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="333">
-          <caret line="371" column="9" selection-start-line="371" selection-start-column="9" selection-end-line="371" selection-end-column="9" />
+        <state relative-caret-position="187">
+          <caret line="11" column="49" lean-forward="true" selection-start-line="11" selection-start-column="49" selection-end-line="11" selection-end-column="49" />
           <folding>
-            <element signature="e#19#895#0" expanded="true" />
             <element signature="n#!!block;n#Relations#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#sayHello#0;n#!!block;n#ProcessData#0" />
             <element signature="n#!!block;n#countProductDesc#0;n#!!block;n#ProcessData#0" />
             <element signature="n#!!block;n#createProduct#0;n#!!block;n#ProcessData#0" />
             <element signature="n#!!block;n#defineProductBrand#0;n#!!block;n#ProcessData#0" />
-            <element signature="e#9278#10722#0" />
-            <element signature="n#!!block;n#wordCount#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#EngineLable#0" />
           </folding>
         </state>
       </provider>

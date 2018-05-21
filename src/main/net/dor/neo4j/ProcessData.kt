@@ -90,11 +90,6 @@ class ProcessData {
     @Context
     lateinit var log: Log
 
-    @UserFunction(name = "adt.hello")
-    fun sayHello(@Name("hello") zz: String): String {
-        return "$zz hello"
-    }
-
     @UserFunction(name = "adt.countDescription")
     fun countProductDesc(@Name("a") pattern: String, @Name("a") description: String): String {
         var sTemp = description
@@ -132,8 +127,8 @@ class ProcessData {
         val startTime = System.currentTimeMillis()
 
         productNodes.forEach {
-            defineProductBrand(it.getProperty("HashTitle").toString());
-            val cat = defineProductCategory(it.getProperty("HashTitle").toString());
+            defineProductBrand(it.getProperty("HashTitle").toString())
+            val cat = defineProductCategory(it.getProperty("HashTitle").toString())
             defineProductFact(it.getProperty("HashTitle").toString(), cat)
         }
         val endTime = System.currentTimeMillis()
