@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="77dd0837-d925-4bb7-baa7-7990c817fb33" name="Default" comment="">
+    <list default="true" id="77dd0837-d925-4bb7-baa7-7990c817fb33" name="Default" comment="Merge branch 'master' of https://github.com/doriumlab/dor_neo4j_rec&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml&#10;#&#9;src/main/net/dor/neo4j/ProcessData.kt">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/net/dor/neo4j/ProcessData.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/net/dor/neo4j/ProcessData.kt" afterDir="false" />
     </list>
@@ -27,17 +27,25 @@
       <file leaf-file-name="ProcessData.kt" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/net/dor/neo4j/ProcessData.kt">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="333">
-              <caret line="371" column="9" selection-start-line="371" selection-start-column="9" selection-end-line="371" selection-end-column="9" />
+            <state relative-caret-position="4674">
+              <caret line="630" column="1" selection-start-line="630" selection-start-column="1" selection-end-line="630" selection-end-column="1" />
               <folding>
-                <element signature="e#19#895#0" expanded="true" />
+                <element signature="e#19#1097#0" expanded="true" />
                 <element signature="n#!!block;n#Relations#0;n#!!block;n#ProcessData#0" />
-                <element signature="n#!!block;n#sayHello#0;n#!!block;n#ProcessData#0" />
-                <element signature="n#!!block;n#countProductDesc#0;n#!!block;n#ProcessData#0" />
+                <element signature="n#!!block;n#counter#0;n#!!block;n#ProcessData#0" />
                 <element signature="n#!!block;n#createProduct#0;n#!!block;n#ProcessData#0" />
+                <element signature="n#!!block;n#defineProduct#0;n#!!block;n#ProcessData#0" />
+                <element signature="n#!!block;n#defineAllProducts#0;n#!!block;n#ProcessData#0" />
                 <element signature="n#!!block;n#defineProductBrand#0;n#!!block;n#ProcessData#0" />
-                <element signature="e#9278#10722#0" />
+                <element signature="e#7218#8434#2" />
+                <element signature="e#8586#8742#1" />
+                <element signature="n#!!block;n#defineProductCategory#0;n#!!block;n#ProcessData#0" />
+                <element signature="e#9302#11085#0" />
+                <element signature="n#!!block;n#defineProductFact#0;n#!!block;n#ProcessData#0" />
+                <element signature="e#18143#19477#2" />
                 <element signature="n#!!block;n#wordCount#0;n#!!block;n#ProcessData#0" />
+                <element signature="n#!!block;n#deleteProductRelation#0;n#!!block;n#ProcessData#0" />
+                <element signature="n#!!block;n#DetectCountViewModel#0" />
                 <element signature="n#!!block;n#EngineLable#0" />
               </folding>
             </state>
@@ -205,11 +213,18 @@
       <option name="project" value="LOCAL" />
       <updated>1526816186335</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="Merge branch 'master' of https://github.com/doriumlab/dor_neo4j_rec&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml&#10;#&#9;src/main/net/dor/neo4j/ProcessData.kt">
+      <created>1527324586345</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1527324586345</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="118518000" />
+    <option name="totallyTimeSpent" value="118816000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-7" y="-7" width="1481" height="878" extended-state="6" />
@@ -222,12 +237,12 @@
       <window_info id="Image Layers" order="2" />
       <window_info anchor="bottom" id="Java Enterprise" order="7" />
       <window_info anchor="right" id="Capture Analysis" order="3" />
-      <window_info anchor="bottom" id="Event Log" order="7" sideWeight="0.50035185" side_tool="true" weight="0.328877" />
+      <window_info anchor="bottom" id="Event Log" order="7" sideWeight="0.5010556" side_tool="true" weight="0.328877" />
       <window_info anchor="right" id="Maven Projects" order="3" />
       <window_info anchor="bottom" id="Database Changes" order="7" show_stripe_button="false" />
-      <window_info anchor="bottom" id="Version Control" order="7" weight="0.328877" />
+      <window_info active="true" anchor="bottom" id="Version Control" order="7" sideWeight="0.4989444" visible="true" weight="0.328877" />
       <window_info anchor="bottom" id="Run" order="2" />
-      <window_info active="true" anchor="bottom" id="Terminal" order="7" sideWeight="0.49964812" visible="true" weight="0.26737967" />
+      <window_info anchor="bottom" id="Terminal" order="7" sideWeight="0.49964812" weight="0.26737967" />
       <window_info id="Capture Tool" order="2" />
       <window_info id="Designer" order="2" />
       <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.25686136" />
@@ -238,12 +253,35 @@
       <window_info anchor="right" id="Theme Preview" order="3" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
+      <window_info anchor="right" id="Palette" order="3" />
+      <window_info id="Designer" order="2" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
+      <window_info anchor="right" id="Capture Analysis" order="3" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
+      <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
+      <window_info active="true" anchor="bottom" id="Terminal" order="7" sideWeight="0.49964812" visible="true" weight="0.26737967" />
+      <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
+      <window_info anchor="bottom" id="TODO" order="6" />
+      <window_info anchor="bottom" id="Database Changes" order="7" show_stripe_button="false" />
+      <window_info anchor="bottom" id="Version Control" order="7" weight="0.328877" />
+      <window_info anchor="bottom" id="Run" order="2" />
+      <window_info id="Image Layers" order="2" />
+      <window_info id="Capture Tool" order="2" />
+      <window_info id="UI Designer" order="2" />
+      <window_info anchor="bottom" id="Java Enterprise" order="7" />
+      <window_info anchor="right" id="Theme Preview" order="3" />
+      <window_info anchor="right" id="Database" order="3" />
+      <window_info anchor="right" id="Palette&#9;" order="3" />
       <window_info anchor="bottom" id="Message" order="0" />
+      <window_info anchor="bottom" id="Event Log" order="7" sideWeight="0.50035185" side_tool="true" weight="0.328877" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
+      <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Find" order="1" />
+      <window_info anchor="bottom" id="Messages" order="7" weight="0.328877" />
+      <window_info anchor="right" id="Maven Projects" order="3" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.25686136" />
     </layout>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -256,7 +294,8 @@
     <MESSAGE value="add Define Product Category Method" />
     <MESSAGE value="add Define Product Category Method&#10;add define brand method&#10;add define fact method &#10;add wordcout using string and pattern" />
     <MESSAGE value="add count for categoryDetect(bug)" />
-    <option name="LAST_COMMIT_MESSAGE" value="add count for categoryDetect(bug)" />
+    <MESSAGE value="Merge branch 'master' of https://github.com/doriumlab/dor_neo4j_rec&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml&#10;#&#9;src/main/net/dor/neo4j/ProcessData.kt" />
+    <option name="LAST_COMMIT_MESSAGE" value="Merge branch 'master' of https://github.com/doriumlab/dor_neo4j_rec&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml&#10;#&#9;src/main/net/dor/neo4j/ProcessData.kt" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -276,14 +315,22 @@
         <state relative-caret-position="2618">
           <caret line="140" column="40" selection-start-line="140" selection-start-column="40" selection-end-line="140" selection-end-column="40" />
           <folding>
-            <element signature="e#19#895#0" expanded="true" />
+            <element signature="e#19#1097#0" expanded="true" />
             <element signature="n#!!block;n#Relations#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#sayHello#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#countProductDesc#0;n#!!block;n#ProcessData#0" />
+            <element signature="n#!!block;n#counter#0;n#!!block;n#ProcessData#0" />
             <element signature="n#!!block;n#createProduct#0;n#!!block;n#ProcessData#0" />
+            <element signature="n#!!block;n#defineProduct#0;n#!!block;n#ProcessData#0" />
+            <element signature="n#!!block;n#defineAllProducts#0;n#!!block;n#ProcessData#0" />
             <element signature="n#!!block;n#defineProductBrand#0;n#!!block;n#ProcessData#0" />
-            <element signature="e#9278#10722#0" />
+            <element signature="e#7218#8434#2" />
+            <element signature="e#8586#8742#1" />
+            <element signature="n#!!block;n#defineProductCategory#0;n#!!block;n#ProcessData#0" />
+            <element signature="e#9302#11085#0" />
+            <element signature="n#!!block;n#defineProductFact#0;n#!!block;n#ProcessData#0" />
+            <element signature="e#18143#19477#2" />
             <element signature="n#!!block;n#wordCount#0;n#!!block;n#ProcessData#0" />
+            <element signature="n#!!block;n#deleteProductRelation#0;n#!!block;n#ProcessData#0" />
+            <element signature="n#!!block;n#DetectCountViewModel#0" />
             <element signature="n#!!block;n#EngineLable#0" />
           </folding>
         </state>
@@ -301,14 +348,22 @@
         <state relative-caret-position="3146">
           <caret line="143" lean-forward="true" selection-start-line="143" selection-end-line="143" />
           <folding>
-            <element signature="e#19#895#0" expanded="true" />
+            <element signature="e#19#1097#0" expanded="true" />
             <element signature="n#!!block;n#Relations#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#sayHello#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#countProductDesc#0;n#!!block;n#ProcessData#0" />
+            <element signature="n#!!block;n#counter#0;n#!!block;n#ProcessData#0" />
             <element signature="n#!!block;n#createProduct#0;n#!!block;n#ProcessData#0" />
+            <element signature="n#!!block;n#defineProduct#0;n#!!block;n#ProcessData#0" />
+            <element signature="n#!!block;n#defineAllProducts#0;n#!!block;n#ProcessData#0" />
             <element signature="n#!!block;n#defineProductBrand#0;n#!!block;n#ProcessData#0" />
-            <element signature="e#9278#10722#0" />
+            <element signature="e#7218#8434#2" />
+            <element signature="e#8586#8742#1" />
+            <element signature="n#!!block;n#defineProductCategory#0;n#!!block;n#ProcessData#0" />
+            <element signature="e#9302#11085#0" />
+            <element signature="n#!!block;n#defineProductFact#0;n#!!block;n#ProcessData#0" />
+            <element signature="e#18143#19477#2" />
             <element signature="n#!!block;n#wordCount#0;n#!!block;n#ProcessData#0" />
+            <element signature="n#!!block;n#deleteProductRelation#0;n#!!block;n#ProcessData#0" />
+            <element signature="n#!!block;n#DetectCountViewModel#0" />
             <element signature="n#!!block;n#EngineLable#0" />
           </folding>
         </state>
@@ -339,17 +394,140 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/net/dor/neo4j/ProcessData.kt">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="333">
-          <caret line="371" column="9" selection-start-line="371" selection-start-column="9" selection-end-line="371" selection-end-column="9" />
+        <state relative-caret-position="383">
+          <caret line="463" column="44" selection-start-line="463" selection-start-column="44" selection-end-line="463" selection-end-column="44" />
           <folding>
-            <element signature="e#19#895#0" expanded="true" />
+            <element signature="e#19#1097#0" expanded="true" />
             <element signature="n#!!block;n#Relations#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#sayHello#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#countProductDesc#0;n#!!block;n#ProcessData#0" />
+            <element signature="n#!!block;n#counter#0;n#!!block;n#ProcessData#0" />
             <element signature="n#!!block;n#createProduct#0;n#!!block;n#ProcessData#0" />
+            <element signature="n#!!block;n#defineProduct#0;n#!!block;n#ProcessData#0" />
+            <element signature="n#!!block;n#defineAllProducts#0;n#!!block;n#ProcessData#0" />
             <element signature="n#!!block;n#defineProductBrand#0;n#!!block;n#ProcessData#0" />
-            <element signature="e#9278#10722#0" />
+            <element signature="e#7218#8434#2" />
+            <element signature="e#8586#8742#1" />
+            <element signature="n#!!block;n#defineProductCategory#0;n#!!block;n#ProcessData#0" />
+            <element signature="e#9302#11085#0" />
+            <element signature="n#!!block;n#defineProductFact#0;n#!!block;n#ProcessData#0" />
+            <element signature="e#18143#19477#2" />
             <element signature="n#!!block;n#wordCount#0;n#!!block;n#ProcessData#0" />
+            <element signature="n#!!block;n#deleteProductRelation#0;n#!!block;n#ProcessData#0" />
+            <element signature="n#!!block;n#DetectCountViewModel#0" />
+            <element signature="n#!!block;n#EngineLable#0" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/pom.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="176">
+          <caret line="8" column="35" selection-start-line="8" selection-start-column="35" selection-end-line="8" selection-end-column="35" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/net/dor/neo4j/ProcessData.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2618">
+          <caret line="140" column="40" selection-start-line="140" selection-start-column="40" selection-end-line="140" selection-end-column="40" />
+          <folding>
+            <element signature="e#19#1097#0" expanded="true" />
+            <element signature="n#!!block;n#Relations#0;n#!!block;n#ProcessData#0" />
+            <element signature="n#!!block;n#counter#0;n#!!block;n#ProcessData#0" />
+            <element signature="n#!!block;n#createProduct#0;n#!!block;n#ProcessData#0" />
+            <element signature="n#!!block;n#defineProduct#0;n#!!block;n#ProcessData#0" />
+            <element signature="n#!!block;n#defineAllProducts#0;n#!!block;n#ProcessData#0" />
+            <element signature="n#!!block;n#defineProductBrand#0;n#!!block;n#ProcessData#0" />
+            <element signature="e#7218#8434#2" />
+            <element signature="e#8586#8742#1" />
+            <element signature="n#!!block;n#defineProductCategory#0;n#!!block;n#ProcessData#0" />
+            <element signature="e#9302#11085#0" />
+            <element signature="n#!!block;n#defineProductFact#0;n#!!block;n#ProcessData#0" />
+            <element signature="e#18143#19477#2" />
+            <element signature="n#!!block;n#wordCount#0;n#!!block;n#ProcessData#0" />
+            <element signature="n#!!block;n#deleteProductRelation#0;n#!!block;n#ProcessData#0" />
+            <element signature="n#!!block;n#DetectCountViewModel#0" />
+            <element signature="n#!!block;n#EngineLable#0" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/pom.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="176">
+          <caret line="8" column="35" selection-start-line="8" selection-start-column="35" selection-end-line="8" selection-end-column="35" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/net/dor/neo4j/ProcessData.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3146">
+          <caret line="143" lean-forward="true" selection-start-line="143" selection-end-line="143" />
+          <folding>
+            <element signature="e#19#1097#0" expanded="true" />
+            <element signature="n#!!block;n#Relations#0;n#!!block;n#ProcessData#0" />
+            <element signature="n#!!block;n#counter#0;n#!!block;n#ProcessData#0" />
+            <element signature="n#!!block;n#createProduct#0;n#!!block;n#ProcessData#0" />
+            <element signature="n#!!block;n#defineProduct#0;n#!!block;n#ProcessData#0" />
+            <element signature="n#!!block;n#defineAllProducts#0;n#!!block;n#ProcessData#0" />
+            <element signature="n#!!block;n#defineProductBrand#0;n#!!block;n#ProcessData#0" />
+            <element signature="e#7218#8434#2" />
+            <element signature="e#8586#8742#1" />
+            <element signature="n#!!block;n#defineProductCategory#0;n#!!block;n#ProcessData#0" />
+            <element signature="e#9302#11085#0" />
+            <element signature="n#!!block;n#defineProductFact#0;n#!!block;n#ProcessData#0" />
+            <element signature="e#18143#19477#2" />
+            <element signature="n#!!block;n#wordCount#0;n#!!block;n#ProcessData#0" />
+            <element signature="n#!!block;n#deleteProductRelation#0;n#!!block;n#ProcessData#0" />
+            <element signature="n#!!block;n#DetectCountViewModel#0" />
+            <element signature="n#!!block;n#EngineLable#0" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/pom.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="176">
+          <caret line="8" column="35" lean-forward="true" selection-start-line="8" selection-start-column="35" selection-end-line="8" selection-end-column="35" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/nansp/pom.xml" />
+    <entry file="file://$PROJECT_DIR$/nansp/src/main/net/dor/neo4j/ProcessData.kt" />
+    <entry file="jar://$MAVEN_REPOSITORY$/org/neo4j/neo4j-graphdb-api/3.3.4/neo4j-graphdb-api-3.3.4.jar!/org/neo4j/graphdb/RelationshipType.class">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="110">
+          <caret line="8" column="3" lean-forward="true" selection-start-line="8" selection-start-column="3" selection-end-line="8" selection-end-column="3" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/pom.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1">
+          <caret line="8" column="35" selection-start-line="8" selection-start-column="35" selection-end-line="8" selection-end-column="35" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/net/dor/neo4j/ProcessData.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="4674">
+          <caret line="630" column="1" selection-start-line="630" selection-start-column="1" selection-end-line="630" selection-end-column="1" />
+          <folding>
+            <element signature="e#19#1097#0" expanded="true" />
+            <element signature="n#!!block;n#Relations#0;n#!!block;n#ProcessData#0" />
+            <element signature="n#!!block;n#counter#0;n#!!block;n#ProcessData#0" />
+            <element signature="n#!!block;n#createProduct#0;n#!!block;n#ProcessData#0" />
+            <element signature="n#!!block;n#defineProduct#0;n#!!block;n#ProcessData#0" />
+            <element signature="n#!!block;n#defineAllProducts#0;n#!!block;n#ProcessData#0" />
+            <element signature="n#!!block;n#defineProductBrand#0;n#!!block;n#ProcessData#0" />
+            <element signature="e#7218#8434#2" />
+            <element signature="e#8586#8742#1" />
+            <element signature="n#!!block;n#defineProductCategory#0;n#!!block;n#ProcessData#0" />
+            <element signature="e#9302#11085#0" />
+            <element signature="n#!!block;n#defineProductFact#0;n#!!block;n#ProcessData#0" />
+            <element signature="e#18143#19477#2" />
+            <element signature="n#!!block;n#wordCount#0;n#!!block;n#ProcessData#0" />
+            <element signature="n#!!block;n#deleteProductRelation#0;n#!!block;n#ProcessData#0" />
+            <element signature="n#!!block;n#DetectCountViewModel#0" />
             <element signature="n#!!block;n#EngineLable#0" />
           </folding>
         </state>
