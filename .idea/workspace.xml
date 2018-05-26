@@ -27,17 +27,25 @@
       <file leaf-file-name="ProcessData.kt" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/net/dor/neo4j/ProcessData.kt">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="333">
-              <caret line="371" column="9" selection-start-line="371" selection-start-column="9" selection-end-line="371" selection-end-column="9" />
+            <state relative-caret-position="383">
+              <caret line="463" column="44" selection-start-line="463" selection-start-column="44" selection-end-line="463" selection-end-column="44" />
               <folding>
-                <element signature="e#19#895#0" expanded="true" />
+                <element signature="e#19#1097#0" expanded="true" />
                 <element signature="n#!!block;n#Relations#0;n#!!block;n#ProcessData#0" />
-                <element signature="n#!!block;n#sayHello#0;n#!!block;n#ProcessData#0" />
-                <element signature="n#!!block;n#countProductDesc#0;n#!!block;n#ProcessData#0" />
+                <element signature="n#!!block;n#sayHello#1;n#!!block;n#ProcessData#0" />
                 <element signature="n#!!block;n#createProduct#0;n#!!block;n#ProcessData#0" />
+                <element signature="n#!!block;n#defineProduct#0;n#!!block;n#ProcessData#0" />
+                <element signature="n#!!block;n#defineAllProducts#0;n#!!block;n#ProcessData#0" />
                 <element signature="n#!!block;n#defineProductBrand#0;n#!!block;n#ProcessData#0" />
-                <element signature="e#9278#10722#0" />
+                <element signature="e#7218#8434#2" />
+                <element signature="e#8586#8742#1" />
+                <element signature="n#!!block;n#defineProductCategory#0;n#!!block;n#ProcessData#0" />
+                <element signature="e#8991#10813#0" />
+                <element signature="n#!!block;n#defineProductFact#0;n#!!block;n#ProcessData#0" />
+                <element signature="e#16226#17514#2" />
                 <element signature="n#!!block;n#wordCount#0;n#!!block;n#ProcessData#0" />
+                <element signature="n#!!block;n#deleteProductRelation#0;n#!!block;n#ProcessData#0" />
+                <element signature="n#!!block;n#DetectCountViewModel#0" />
                 <element signature="n#!!block;n#EngineLable#0" />
               </folding>
             </state>
@@ -50,6 +58,8 @@
     <findStrings>
       <find>array</find>
       <find>log.info</find>
+      <find>cd3</find>
+      <find>d</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -182,7 +192,7 @@
       <workItem from="1525951471975" duration="2936000" />
       <workItem from="1526107664273" duration="94996000" />
       <workItem from="1526544501489" duration="201000" />
-      <workItem from="1526546952235" duration="17569000" />
+      <workItem from="1526546952235" duration="66586000" />
     </task>
     <task id="LOCAL-00001" summary="add Define Product Category Method">
       <created>1525951751116</created>
@@ -205,15 +215,21 @@
       <option name="project" value="LOCAL" />
       <updated>1526816186335</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="clean code">
+      <created>1526816658128</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1526816658128</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="118518000" />
+    <option name="totallyTimeSpent" value="167535000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-7" y="-7" width="1481" height="878" extended-state="6" />
-    <editor active="true" />
     <layout>
       <window_info anchor="right" id="Palette" order="3" />
       <window_info anchor="bottom" id="TODO" order="6" />
@@ -256,11 +272,12 @@
     <MESSAGE value="add Define Product Category Method" />
     <MESSAGE value="add Define Product Category Method&#10;add define brand method&#10;add define fact method &#10;add wordcout using string and pattern" />
     <MESSAGE value="add count for categoryDetect(bug)" />
-    <option name="LAST_COMMIT_MESSAGE" value="add count for categoryDetect(bug)" />
+    <MESSAGE value="clean code" />
+    <option name="LAST_COMMIT_MESSAGE" value="clean code" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <option name="time" value="4" />
+      <option name="time" value="8" />
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
@@ -276,14 +293,22 @@
         <state relative-caret-position="2618">
           <caret line="140" column="40" selection-start-line="140" selection-start-column="40" selection-end-line="140" selection-end-column="40" />
           <folding>
-            <element signature="e#19#895#0" expanded="true" />
+            <element signature="e#19#1097#0" expanded="true" />
             <element signature="n#!!block;n#Relations#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#sayHello#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#countProductDesc#0;n#!!block;n#ProcessData#0" />
+            <element signature="n#!!block;n#sayHello#1;n#!!block;n#ProcessData#0" />
             <element signature="n#!!block;n#createProduct#0;n#!!block;n#ProcessData#0" />
+            <element signature="n#!!block;n#defineProduct#0;n#!!block;n#ProcessData#0" />
+            <element signature="n#!!block;n#defineAllProducts#0;n#!!block;n#ProcessData#0" />
             <element signature="n#!!block;n#defineProductBrand#0;n#!!block;n#ProcessData#0" />
-            <element signature="e#9278#10722#0" />
+            <element signature="e#7218#8434#2" />
+            <element signature="e#8586#8742#1" />
+            <element signature="n#!!block;n#defineProductCategory#0;n#!!block;n#ProcessData#0" />
+            <element signature="e#8991#10813#0" />
+            <element signature="n#!!block;n#defineProductFact#0;n#!!block;n#ProcessData#0" />
+            <element signature="e#16226#17514#2" />
             <element signature="n#!!block;n#wordCount#0;n#!!block;n#ProcessData#0" />
+            <element signature="n#!!block;n#deleteProductRelation#0;n#!!block;n#ProcessData#0" />
+            <element signature="n#!!block;n#DetectCountViewModel#0" />
             <element signature="n#!!block;n#EngineLable#0" />
           </folding>
         </state>
@@ -301,14 +326,22 @@
         <state relative-caret-position="3146">
           <caret line="143" lean-forward="true" selection-start-line="143" selection-end-line="143" />
           <folding>
-            <element signature="e#19#895#0" expanded="true" />
+            <element signature="e#19#1097#0" expanded="true" />
             <element signature="n#!!block;n#Relations#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#sayHello#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#countProductDesc#0;n#!!block;n#ProcessData#0" />
+            <element signature="n#!!block;n#sayHello#1;n#!!block;n#ProcessData#0" />
             <element signature="n#!!block;n#createProduct#0;n#!!block;n#ProcessData#0" />
+            <element signature="n#!!block;n#defineProduct#0;n#!!block;n#ProcessData#0" />
+            <element signature="n#!!block;n#defineAllProducts#0;n#!!block;n#ProcessData#0" />
             <element signature="n#!!block;n#defineProductBrand#0;n#!!block;n#ProcessData#0" />
-            <element signature="e#9278#10722#0" />
+            <element signature="e#7218#8434#2" />
+            <element signature="e#8586#8742#1" />
+            <element signature="n#!!block;n#defineProductCategory#0;n#!!block;n#ProcessData#0" />
+            <element signature="e#8991#10813#0" />
+            <element signature="n#!!block;n#defineProductFact#0;n#!!block;n#ProcessData#0" />
+            <element signature="e#16226#17514#2" />
             <element signature="n#!!block;n#wordCount#0;n#!!block;n#ProcessData#0" />
+            <element signature="n#!!block;n#deleteProductRelation#0;n#!!block;n#ProcessData#0" />
+            <element signature="n#!!block;n#DetectCountViewModel#0" />
             <element signature="n#!!block;n#EngineLable#0" />
           </folding>
         </state>
@@ -339,17 +372,25 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/net/dor/neo4j/ProcessData.kt">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="333">
-          <caret line="371" column="9" selection-start-line="371" selection-start-column="9" selection-end-line="371" selection-end-column="9" />
+        <state relative-caret-position="383">
+          <caret line="463" column="44" selection-start-line="463" selection-start-column="44" selection-end-line="463" selection-end-column="44" />
           <folding>
-            <element signature="e#19#895#0" expanded="true" />
+            <element signature="e#19#1097#0" expanded="true" />
             <element signature="n#!!block;n#Relations#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#sayHello#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#countProductDesc#0;n#!!block;n#ProcessData#0" />
+            <element signature="n#!!block;n#sayHello#1;n#!!block;n#ProcessData#0" />
             <element signature="n#!!block;n#createProduct#0;n#!!block;n#ProcessData#0" />
+            <element signature="n#!!block;n#defineProduct#0;n#!!block;n#ProcessData#0" />
+            <element signature="n#!!block;n#defineAllProducts#0;n#!!block;n#ProcessData#0" />
             <element signature="n#!!block;n#defineProductBrand#0;n#!!block;n#ProcessData#0" />
-            <element signature="e#9278#10722#0" />
+            <element signature="e#7218#8434#2" />
+            <element signature="e#8586#8742#1" />
+            <element signature="n#!!block;n#defineProductCategory#0;n#!!block;n#ProcessData#0" />
+            <element signature="e#8991#10813#0" />
+            <element signature="n#!!block;n#defineProductFact#0;n#!!block;n#ProcessData#0" />
+            <element signature="e#16226#17514#2" />
             <element signature="n#!!block;n#wordCount#0;n#!!block;n#ProcessData#0" />
+            <element signature="n#!!block;n#deleteProductRelation#0;n#!!block;n#ProcessData#0" />
+            <element signature="n#!!block;n#DetectCountViewModel#0" />
             <element signature="n#!!block;n#EngineLable#0" />
           </folding>
         </state>

@@ -1,5 +1,6 @@
 package dor.neo4j
 
+import org.bouncycastle.asn1.DEREncodableVector
 import org.neo4j.graphdb.GraphDatabaseService
 import org.neo4j.graphdb.Label
 import org.neo4j.graphdb.Node
@@ -18,9 +19,13 @@ import org.neo4j.cypher.internal.spi.v3_1.codegen.Methods.row
 import org.neo4j.cypher.internal.`InternalExecutionResult$class`.columns
 import org.neo4j.cypher.internal.`InternalExecutionResult$class`.columns
 import org.neo4j.cypher.internal.compiler.v3_1.codegen.ir.expressions.TypeOf
+import org.neo4j.cypher.internal.frontend.v2_3.ast.functions.Str
 import org.neo4j.graphdb.QueryExecutionType.query
+import java.util.*
 import javax.management.relation.Relation
 import javax.swing.text.StyledEditorKit
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
 
 class ProcessData {
@@ -95,9 +100,9 @@ class ProcessData {
         return "$zz hello"
     }
 
-    @UserFunction(name = "adt.countDescription")
-    fun countProductDesc(@Name("a") pattern: String, @Name("a") description: String): String {
-        var sTemp = description
+    @UserFunction(name = "adt.counter")
+    fun counter(@Name("Detect") pattern: String,@Name("Description") text: String): Number {
+        var sTemp = text.toLowerCase()
         var counter = 0
 
         while (sTemp.length > 0) {
@@ -106,7 +111,7 @@ class ProcessData {
             sTemp = sTemp.substring(index + pattern.length, sTemp.length)
             counter++
         }
-        return counter.toString()
+        return counter
     }
 
     @Procedure(name = "adt.createProduct")
@@ -121,25 +126,26 @@ class ProcessData {
 
     @Procedure(name = "adt.defineProduct", mode = Mode.WRITE)
     fun defineProduct(@Name("HashTitle") hashTitle: String) {
-        defineProductBrand(hashTitle)
-        val Category = defineProductCategory(hashTitle)
-        defineProductFact(hashTitle, Category)
+        val product: Node = db.findNode(EngineLable.productLabel(), "HashTitle", hashTitle)
+        var s = analyseProduct(product)
+        log.info("status: " + s.toString())
     }
 
     @Procedure(name = "adt.defineAllProducts", mode = Mode.WRITE)
-    fun defineAllProducts() {
-        val productNodes: ResourceIterator<Node> = db.findNodes(EngineLable.productLabel())
-        val startTime = System.currentTimeMillis()
+    fun defineAllProducts(){
+        try {
 
-        productNodes.forEach {
-            defineProductBrand(it.getProperty("HashTitle").toString());
-            val cat = defineProductCategory(it.getProperty("HashTitle").toString());
-            defineProductFact(it.getProperty("HashTitle").toString(), cat)
+            val startTime = System.currentTimeMillis()
+
+            analyseAllProduct()
+
+            val endTime = System.currentTimeMillis()
+            val duration = (endTime - startTime)
+            log.info(duration.toString())
+        } catch (e: Exception) {
+            log.info("${e.message}")
         }
-        val endTime = System.currentTimeMillis()
-        val duration = (endTime - startTime)
 
-        log.info(duration.toString())
 
     }
 
@@ -152,16 +158,16 @@ class ProcessData {
                                    WHERE s.SiteId = 'a462b94d-687f-486b-9595-065922b09d8b'
                                    WITH c,cd, '$productContent' as productDescription
                                    WHERE productDescription CONTAINS toString(' ' + cd.Title +' ')
-                                   RETURN c as brand, collect(cd) as brandDetect
-                                   UNION
-                                   MATCH (s:SiteConfiguration)-[:${Relations.BRAND_IN_SITE.toString()}]-(c:Brand)-[:${Relations.AND_BRANDDEDETECT_IN_BRAND.toString()}]-(cd:BrandDetect)
-                                   WHERE s.SiteId = 'a462b94d-687f-486b-9595-065922b09d8b'
-                                   WITH c,cd, '$productContent' as productDescription,collect(cd.Title) as detectTitle, collect(cd.Id) as detectId
-                                   WHERE all (x IN detectTitle WHERE productDescription CONTAINS toString(' ' + x +' '))
-                                   WITH c,cd, detectTitle, detectId
-                                   MATCH (s:SiteConfiguration)-[:${Relations.BRANDDETECT_IN_SITE.toString()}]-(cd2:BrandDetect)
-                                   WHERE cd2.Id in detectId
-                                   RETURN c as brand, collect(cd2) as brandDetect""".trimMargin()
+                                   RETURN c as brand, collect(cd) as brandDetect""".trimMargin()
+//                                   UNION
+//                                   MATCH (s:SiteConfiguration)-[:${Relations.BRAND_IN_SITE.toString()}]-(c:Brand)-[:${Relations.AND_BRANDDEDETECT_IN_BRAND.toString()}]-(cd:BrandDetect)
+//                                   WHERE s.SiteId = 'a462b94d-687f-486b-9595-065922b09d8b'
+//                                   WITH c,cd, '$productContent' as productDescription,collect(cd.Title) as detectTitle, collect(cd.Id) as detectId
+//                                   WHERE all (x IN detectTitle WHERE productDescription CONTAINS toString(' ' + x +' '))
+//                                   WITH c,cd, detectTitle, detectId
+//                                   MATCH (s:SiteConfiguration)-[:${Relations.BRANDDETECT_IN_SITE.toString()}]-(cd2:BrandDetect)
+//                                   WHERE cd2.Id in detectId
+//                                   RETURN c as brand, collect(cd2) as brandDetect
 
             val brandDetectCountList = mutableListOf<DetectCountViewModel>()
 
@@ -203,7 +209,6 @@ class ProcessData {
 
                     val detectInstanse = DetectCountViewModel(count, brand)
                     brandDetectCountList.add(detectInstanse)
-                    log.info(detectInstanse.toString())
                 }
                 result.close()
             })
@@ -225,22 +230,42 @@ class ProcessData {
     private fun defineProductCategory(hashTitle: String): Node? {
         try {
             val product: Node = db.findNode(EngineLable.productLabel(), "HashTitle", hashTitle)
-            val productContent: String = "${product.getProperty("Description")} ${product.getProperty("FaTitle")} ${product.getProperty("EnTitle")}".toLowerCase()
+//            val productContent: String = "${product.getProperty("Description")} ${product.getProperty("FaTitle")} ${product.getProperty("EnTitle")}".toLowerCase()
 
-            val query: String = """MATCH (s:SiteConfiguration)-[:${Relations.RP_CATEGORY_IN_SITE.toString()}]-(c:RPCategory)-[:${Relations.CATEGORYDETECT_IN_RPCATEGORY.toString()}]-(cd:CategoryDetect)
-                                   WHERE s.SiteId = 'a462b94d-687f-486b-9595-065922b09d8b'
-                                   WITH c,cd, '$productContent' as productDescription
-                                   WHERE productDescription CONTAINS toString(' ' + cd.Title +' ')
-                                   RETURN c as category, collect(cd) as categoryDetect
-                                   UNION
-                                   MATCH (s:SiteConfiguration)-[:${Relations.RP_CATEGORY_IN_SITE.toString()}]-(c:RPCategory)-[:${Relations.AND_CATEGORYDETECT_IN_RPCATEGORY.toString()}]-(cd:CategoryDetect)
-                                   WHERE s.SiteId = 'a462b94d-687f-486b-9595-065922b09d8b'
-                                   WITH c,cd, '$productContent' as productDescription,collect(cd.Title) as detectTitle, collect(cd.Id) as detectId
-                                   WHERE all (x IN detectTitle WHERE productDescription CONTAINS toString(' ' + x +' '))
-                                   WITH c,cd, detectTitle, detectId
-                                   MATCH (s:SiteConfiguration)-[:${Relations.RP_CATEGORY_IN_SITE.toString()}]-(cd2:CategoryDetect)
-                                   WHERE cd2.Id in detectId
-                                   RETURN c as category, collect(cd2) as categoryDetect""".trimMargin()
+            val query = """MATCH (p:Product {HashTitle:$hashTitle} )-[:${Relations.PRODUCT_HAS_DESCRIPTION}|:${Relations.PRODUCT_HAS_PERSIANTITLE}|:${Relations.PRODUCT_HAS_ENGLISHTITLE}]-(:Word)-[:${Relations.NEXT}*]-(w:Word)
+                           WITH w, p
+                           MATCH (s:SiteConfiguration)-[:${Relations.RP_CATEGORY_IN_SITE}]-(rc:RPCategory)-[:${Relations.CATEGORYDETECT_IN_RPCATEGORY}]-(cd:CategoryDetect)
+                           WHERE s.SiteId = 'a462b94d-687f-486b-9595-065922b09d8b
+                           WITH split(cd.Title," ") as spliteCd, rc, cd, w, p
+                           WHERE all(x in spliteCd WHERE x in w.Title)
+                           WITH count(w) as wordCountRc,rc as cat,collect(DISTINCT cd.Id) as detectRc, p, w
+                           MATCH (cd2:CategoryDetect)
+                           WHERE cd2.Id in detectRc
+                           CREATE UNIQUE (p)-[:${Relations.CATEGORYDETECT_HAS_PRODUCT}]-(cd2)
+                           CREATE UNIQUE (p)-[:${Relations.RP_CATEGORY_HAS_PRODUCT} {DetectCount:wordCount}]-(cat)
+                           WITH max(wordCountRc) as maxWordCount,cat,p limit 1
+                           CREATE UNIQUE (cat)-[:${Relations.PRODUCT_HAS_MAIN_RPCATEGORY} {DetectCount:wordCount}]-(p)
+                           WITH cat,p
+                           MATCH (s:SiteConfiguration)-[:${Relations.RP_CATEGORY_IN_SITE.toString()}]-(rp:RPCategory)-[:${Relations.FACT_HAS_CATEGORY.toString()}]-(f:Fact)-[:${Relations.FACTDETECT_IN_FACT}]-(fd:FactDetect)
+                           WHERE s.SiteId = 'a462b94d-687f-486b-9595-065922b09d8b'
+                           AND rp.Id = cat.Id
+                           WITH split(fd.Title," ") as d2,f,fd
+                           WHERE all(x in d2 WHERE x in w.Title)""".trimMargin()
+
+//            val query: String = """MATCH (s:SiteConfiguration)-[:${Relations.RP_CATEGORY_IN_SITE.toString()}]-(c:RPCategory)-[:${Relations.CATEGORYDETECT_IN_RPCATEGORY.toString()}]-(cd:CategoryDetect)
+//                                   WHERE s.SiteId = 'a462b94d-687f-486b-9595-065922b09d8b'
+//                                   WITH c,cd, '$productContent' as productDescription
+//                                   WHERE productDescription CONTAINS toString(' ' + cd.Title +' ')
+//                                   RETURN c as category, collect(cd) as categoryDetect""".trimMargin()
+//                                   UNION
+//                                   MATCH (s:SiteConfiguration)-[:${Relations.RP_CATEGORY_IN_SITE.toString()}]-(c:RPCategory)-[:${Relations.AND_CATEGORYDETECT_IN_RPCATEGORY.toString()}]-(cd:CategoryDetect)
+//                                   WHERE s.SiteId = 'a462b94d-687f-486b-9595-065922b09d8b'
+//                                   WITH c,cd, '$productContent' as productDescription,collect(cd.Title) as detectTitle, collect(cd.Id) as detectId
+//                                   WHERE all (x IN detectTitle WHERE productDescription CONTAINS toString(' ' + x +' '))
+//                                   WITH c,cd, detectTitle, detectId
+//                                   MATCH (s:SiteConfiguration)-[:${Relations.RP_CATEGORY_IN_SITE.toString()}]-(cd2:CategoryDetect)
+//                                   WHERE cd2.Id in detectId
+//                                   RETURN c as category, collect(cd2) as categoryDetect
 
             val brandDetectCountList = mutableListOf<DetectCountViewModel>()
 
@@ -259,34 +284,34 @@ class ProcessData {
                 it.delete()
             }
 
-            db.execute(query).use({ result ->
-                while (result.hasNext()) {
-                    val row = result.next()
-
-                    val brand: Node = row.get("category") as Node
-                    @Suppress("UNCHECKED_CAST")
-                    val brandDetect: Iterable<Node> = row.get("categoryDetect") as Iterable<Node>
-
-                    var count: Int = 0
-
-                    brandDetect.forEach {
-                        val wordCount: Int = wordCount(productContent, it.getProperty("Title").toString())
-
-                        val productToBrandDetectRel: Relationship = product.createRelationshipTo(it, RelationshipType { Relations.CATEGORYDETECT_HAS_PRODUCT.toString() })
-                        productToBrandDetectRel.setProperty("DetectCount", wordCount)
-
-                        count += wordCount
-                    }
-
-                    val rel: Relationship = product.createRelationshipTo(brand, RelationshipType { Relations.RP_CATEGORY_HAS_PRODUCT.toString() })
-                    rel.setProperty("DetectCount", count)
-
-                    val detectInstanse = DetectCountViewModel(count, brand)
-                    brandDetectCountList.add(detectInstanse)
-                }
-                result.close()
-            })
-
+//            db.execute(query).use({ result ->
+//                while (result.hasNext()) {
+//                    val row = result.next()
+//
+//                    val brand: Node = row.get("category") as Node
+//                    @Suppress("UNCHECKED_CAST")
+//                    val brandDetect: Iterable<Node> = row.get("categoryDetect") as Iterable<Node>
+//
+//                    var count: Int = 0
+//
+//                    brandDetect.forEach {
+//                        val wordCount: Int = wordCount(productContent, it.getProperty("Title").toString())
+//
+//                        val productToBrandDetectRel: Relationship = product.createRelationshipTo(it, RelationshipType { Relations.CATEGORYDETECT_HAS_PRODUCT.toString() })
+//                        productToBrandDetectRel.setProperty("DetectCount", wordCount)
+//
+//                        count += wordCount
+//                    }
+//
+//                    val rel: Relationship = product.createRelationshipTo(brand, RelationshipType { Relations.RP_CATEGORY_HAS_PRODUCT.toString() })
+//                    rel.setProperty("DetectCount", count)
+//
+//                    val detectInstanse = DetectCountViewModel(count, brand)
+//                    brandDetectCountList.add(detectInstanse)
+//                }
+//                result.close()
+//            })
+            db.execute(query)
             val maxBrandDetectElemnt: DetectCountViewModel? = brandDetectCountList.maxBy { it.count }
             if (maxBrandDetectElemnt != null) {
 
@@ -312,17 +337,17 @@ class ProcessData {
                                    AND rp.Id = '${category.getProperty("Id").toString()}'
                                    WITH c,cd, '$productContent' as productDescription
                                    WHERE productDescription CONTAINS toString(' ' + cd.Title +' ')
-                                   RETURN c as fact, collect(cd) as factDetect
-                                   UNION
-                                   MATCH (s:SiteConfiguration)-[:${Relations.RP_CATEGORY_IN_SITE.toString()}]-(rp:RPCategory)-[:${Relations.FACT_HAS_CATEGORY.toString()}]-(c:Fact)-[:${Relations.AND_FACTDETECT_IN_FACT}]-(cd:FactDetect)
-                                   WHERE s.SiteId = 'a462b94d-687f-486b-9595-065922b09d8b'
-                                   AND rp.Id = '${category.getProperty("Id").toString()}'
-                                   WITH c,cd, '$productContent' as productDescription,collect(cd.Title) as detectTitle, collect(cd.Id) as detectId
-                                   WHERE all (x IN detectTitle WHERE productDescription CONTAINS toString(' ' + x +' '))
-                                   WITH c,cd, detectTitle, detectId
-                                   MATCH (s:SiteConfiguration)-[:${Relations.FACTDETECT_IN_SITE.toString()}]-(cd2:FactDetect)
-                                   WHERE cd2.Id in detectId
-                                   RETURN c as fact, collect(cd2) as factDetect""".trimMargin()
+                                   RETURN c as fact, collect(cd) as factDetect""".trimMargin()
+//                                   UNION
+//                                   MATCH (s:SiteConfiguration)-[:${Relations.RP_CATEGORY_IN_SITE.toString()}]-(rp:RPCategory)-[:${Relations.FACT_HAS_CATEGORY.toString()}]-(c:Fact)-[:${Relations.AND_FACTDETECT_IN_FACT}]-(cd:FactDetect)
+//                                   WHERE s.SiteId = 'a462b94d-687f-486b-9595-065922b09d8b'
+//                                   AND rp.Id = '${category.getProperty("Id").toString()}'
+//                                   WITH c,cd, '$productContent' as productDescription,collect(cd.Title) as detectTitle, collect(cd.Id) as detectId
+//                                   WHERE all (x IN detectTitle WHERE productDescription CONTAINS toString(' ' + x +' '))
+//                                   WITH c,cd, detectTitle, detectId
+//                                   MATCH (s:SiteConfiguration)-[:${Relations.FACTDETECT_IN_SITE.toString()}]-(cd2:FactDetect)
+//                                   WHERE cd2.Id in detectId
+//                                   RETURN c as fact, collect(cd2) as factDetect
 
                 val brandDetectCountList = mutableListOf<DetectCountViewModel>()
 
@@ -351,6 +376,8 @@ class ProcessData {
                             val productToBrandDetectRel: Relationship = product.createRelationshipTo(it, RelationshipType { Relations.FACTDETECT_HAS_PRODUCT.toString() })
                             productToBrandDetectRel.setProperty("DetectCount", wordCount)
 
+                            log.info("word")
+
                             count += wordCount
                         }
 
@@ -372,6 +399,195 @@ class ProcessData {
         }
     }
 
+    private fun analyseProduct(product: Node): Boolean {
+
+        try {
+
+//            deleteProductRelation(product)
+
+            var query = """MATCH (p:Product {HashTitle:'${product.getProperty("HashTitle")}'} )-[:PRODUCT_HAS_DESCRIPTION|:PRODUCT_HAS_PERSIANTITLE|:PRODUCT_HAS_ENGLISHTITLE]-(:Word)-[:NEXT*]-(w:Word)
+                           WITH w, p
+                           MATCH (s:SiteConfiguration)-[:RP_CATEGORY_IN_SITE]-(c:RPCategory)-[:CATEGORYDETECT_IN_RPCATEGORY]-(cd:CategoryDetect)
+                           WHERE s.SiteId = 'a462b94d-687f-486b-9595-065922b09d8b'
+                           WITH split(cd.Title," ") as d, c, cd, collect(w.Title) as word, p
+                           WHERE ALL(x in d WHERE x in word)
+                          // WITH count(w) as wordCount,c as cat,collect(DISTINCT cd.Id) as detect, p
+                          WITH adt.counter(cd.Title,toString(p.Description + " " + p.FaTitle + " " + p.EnTitle)) as dd, cd, c, p
+                          WITH sum(dd) as wordCount, collect(cd.Id) as detect, c as cat, p
+                           MATCH (cd2:CategoryDetect)
+                           WHERE cd2.Id in detect
+                           WITH cd2, p, cat, wordCount
+                           OPTIONAL MATCH (p)-[r:CATEGORYDETECT_HAS_PRODUCT]-(:CategoryDetect)
+                           DELETE r
+                           WITH cd2, p, cat, wordCount
+                           OPTIONAL MATCH (p)-[r2:RP_CATEGORY_HAS_PRODUCT]-(:RPCategory)
+                           DELETE r2
+                           WITH cd2, p, cat, wordCount
+                           OPTIONAL MATCH (p)<-[r3:PRODUCT_HAS_MAIN_RPCATEGORY]-(:RPCategory)
+                           DELETE r3
+                           WITH cd2, p, cat, wordCount
+                           MERGE (p)-[:CATEGORYDETECT_HAS_PRODUCT]-(cd2)
+                           MERGE (p)-[:RP_CATEGORY_HAS_PRODUCT {DetectCount:wordCount}]-(cat)
+                           WITH wordCount, cat, p  order by wordCount DESC limit 1
+                           MERGE (cat)-[:PRODUCT_HAS_MAIN_RPCATEGORY {DetectCount:wordCount}]-(p)
+                           """.trimMargin()
+
+            var queryFact = """
+                           MATCH (p:Product {HashTitle:'${product.getProperty("HashTitle")}'})-[:PRODUCT_HAS_DESCRIPTION|:PRODUCT_HAS_PERSIANTITLE|:PRODUCT_HAS_ENGLISHTITLE]-(:Word)-[:NEXT*]-(w2:Word)
+                           WITH w2, p
+                           MATCH (p)-[:PRODUCT_HAS_MAIN_RPCATEGORY]-(rp:RPCategory)-[:FACT_HAS_CATEGORY]-(c2:Fact)-[:FACTDETECT_HAS_FACT]-(cd2:FactDetect)
+                           WITH split(cd2.Title," ") as d3, c2, cd2, collect(w2.Title) as word, p
+                           WHERE ALL(x in d3 WHERE x in word)
+                           WITH adt.counter(cd2.Title,toString(p.Description + " " + p.FaTitle + " " + p.EnTitle)) as dd, cd2, c2, p
+                           WITH sum(dd) as wordCount2, collect(cd2.Id) as detect2, c2 as cat2, p
+                           //WITH split(cd2.Title," ") as d2, c2, cd2, p, w2
+                           //WHERE all(x in d2 WHERE x in w2.Title)
+                           //WITH count(w2) as wordCount2, c2 as cat2, collect(DISTINCT cd2.Id) as detect2, p
+                           MATCH (cd3:FactDetect)
+                           WHERE cd3.Id in detect2
+                           WITH cd3, wordCount2, cat2, p
+                           OPTIONAL MATCH (p)-[r:FACTDETECT_HAS_PRODUCT]-(:FactDetect)
+                           DELETE r
+                           WITH cd3, wordCount2, cat2, p
+                           OPTIONAL MATCH (p)-[r2:FACT_HAS_PRODUCT]-(:Fact)
+                           DELETE r2
+                           WITH cd3, wordCount2, cat2, p
+                           MERGE (p)-[:FACTDETECT_HAS_PRODUCT]-(cd3)
+                           MERGE (p)-[:FACT_HAS_PRODUCT {DetectCount:wordCount2}]-(cat2)""".trimMargin()
+
+            var queryBrand = """
+                           MATCH (p:Product {HashTitle:'${product.getProperty("HashTitle")}'})-[:PRODUCT_HAS_DESCRIPTION|:PRODUCT_HAS_PERSIANTITLE|:PRODUCT_HAS_ENGLISHTITLE]-(:Word)-[:NEXT*]-(w3:Word)
+                           WITH p, w3
+                           MATCH (s3:SiteConfiguration)-[:BRAND_IN_SITE]-(c3:Brand)-[:BRANDDEDETECT_IN_BRAND]-(cd3:BrandDetect)
+                           WHERE s3.SiteId = 'a462b94d-687f-486b-9595-065922b09d8b'
+                           WITH split(cd3.Title," ") as d3, c3, cd3, collect(w3.Title) as word, p
+                           WHERE ALL(x in d3 WHERE x in word)
+                           WITH adt.counter(cd3.Title,toString(p.Description + " " + p.FaTitle + " " + p.EnTitle)) as dd, cd3, c3, p
+                           WITH sum(dd) as wordCount3, collect(cd3.Id) as detect3, c3 as cat3, p
+                           //WITH split(cd3.Title," ") as d3, c3, cd3, w3, p
+                           //WHERE all(x in d3 WHERE x in w3.Title)
+                           //WITH count(w3) as wordCount3, c3 as cat3, collect(DISTINCT cd3.Id) as detect3, p
+                           MATCH (cd4:BrandDetect)
+                           WHERE cd4.Id in detect3
+                           WITH cd4, p, cat3, wordCount3
+                           OPTIONAL MATCH (p)-[r:BRANDDETECT_HAS_PRODUCT]-(:BrandDetect)
+                           DELETE r
+                           WITH cd4, p, cat3, wordCount3
+                           OPTIONAL MATCH (p)-[r2:PRODUCT_HAS_BRAND]-(:Brand)
+                           DELETE r2
+                           WITH cd4, p, cat3, wordCount3
+                           OPTIONAL MATCH (p)<-[r3:PRODUCT_HAS_MAIN_BRAND]-(:Brand)
+                           DELETE r3
+                           WITH cd4, p, cat3, wordCount3
+                           MERGE (p)-[:BRANDDETECT_HAS_PRODUCT]-(cd4)
+                           MERGE (p)-[:PRODUCT_HAS_BRAND {DetectCount:wordCount3}]-(cat3)
+                           WITH wordCount3, cat3, p order by wordCount3 DESC limit 1
+                           MERGE (cat3)-[:PRODUCT_HAS_MAIN_BRAND {DetectCount:wordCount3}]-(p)""".trimMargin()
+
+            db.execute(query)
+            db.execute(queryFact)
+            db.execute(queryBrand)
+
+            return true
+        } catch (e: Exception) {
+            log.info("Error: " + e.message)
+            return false
+        }
+
+    }
+
+    private fun analyseAllProduct(): Boolean {
+        try {
+
+            var query = """MATCH (p:Product)-[:PRODUCT_HAS_DESCRIPTION|:PRODUCT_HAS_PERSIANTITLE|:PRODUCT_HAS_ENGLISHTITLE]-(:Word)-[:NEXT*]-(w:Word)
+                           WITH w, p
+                           MATCH (s:SiteConfiguration)-[:RP_CATEGORY_IN_SITE]-(c:RPCategory)-[:CATEGORYDETECT_IN_RPCATEGORY]-(cd:CategoryDetect)
+                           WHERE s.SiteId = 'a462b94d-687f-486b-9595-065922b09d8b'
+                           WITH split(cd.Title," ") as d, c, cd, collect(w.Title) as word, p
+                           WHERE ALL(x in d WHERE x in word)
+                          // WITH count(w) as wordCount,c as cat,collect(DISTINCT cd.Id) as detect, p
+                          WITH adt.counter(cd.Title,toString(p.Description + " " + p.FaTitle + " " + p.EnTitle)) as dd, cd, c, p
+                          WITH sum(dd) as wordCount, collect(cd.Id) as detect, c as cat, p
+                           MATCH (cd2:CategoryDetect)
+                           WHERE cd2.Id in detect
+                           WITH cd2, p, cat, wordCount
+                           OPTIONAL MATCH (p)-[r:CATEGORYDETECT_HAS_PRODUCT]-(:CategoryDetect)
+                           DELETE r
+                           WITH cd2, p, cat, wordCount
+                           OPTIONAL MATCH (p)-[r2:RP_CATEGORY_HAS_PRODUCT]-(:RPCategory)
+                           DELETE r2
+                           WITH cd2, p, cat, wordCount
+                           OPTIONAL MATCH (p)<-[r3:PRODUCT_HAS_MAIN_RPCATEGORY]-(:RPCategory)
+                           DELETE r3
+                           WITH cd2, p, cat, wordCount
+                           MERGE (p)-[:CATEGORYDETECT_HAS_PRODUCT]-(cd2)
+                           MERGE (p)-[:RP_CATEGORY_HAS_PRODUCT {DetectCount:wordCount}]-(cat)
+                           WITH wordCount, cat, p  order by wordCount DESC limit 1
+                           MERGE (cat)-[:PRODUCT_HAS_MAIN_RPCATEGORY {DetectCount:wordCount}]-(p)
+                           """.trimMargin()
+
+            var queryFact = """
+                           MATCH (p:Product)-[:PRODUCT_HAS_DESCRIPTION|:PRODUCT_HAS_PERSIANTITLE|:PRODUCT_HAS_ENGLISHTITLE]-(:Word)-[:NEXT*]-(w2:Word)
+                           WITH w2, p
+                           MATCH (p)-[:PRODUCT_HAS_MAIN_RPCATEGORY]-(rp:RPCategory)-[:FACT_HAS_CATEGORY]-(c2:Fact)-[:FACTDETECT_IN_FACT]-(cd2:FactDetect)
+                           WITH split(cd2.Title," ") as d3, c2, cd2, collect(w2.Title) as word, p
+                           WHERE ALL(x in d3 WHERE x in word)
+                           WITH adt.counter(cd2.Title,toString(p.Description + " " + p.FaTitle + " " + p.EnTitle)) as dd, cd2, c2, p
+                           WITH sum(dd) as wordCount2, collect(cd2.Id) as detect2, c2 as cat2, p
+                           //WITH split(cd2.Title," ") as d2, c2, cd2, p, w2
+                           //WHERE all(x in d2 WHERE x in w2.Title)
+                           //WITH count(w2) as wordCount2, c2 as cat2, collect(DISTINCT cd2.Id) as detect2, p
+                           MATCH (cd3:FactDetect)
+                           WHERE cd3.Id in detect2
+                           WITH cd3, wordCount2, cat2, p
+                           OPTIONAL MATCH (p)-[r:FACTDETECT_HAS_PRODUCT]-(:FactDetect)
+                           DELETE r
+                           WITH cd3, wordCount2, cat2, p
+                           OPTIONAL MATCH (p)-[r2:FACT_HAS_PRODUCT]-(:Fact)
+                           DELETE r2
+                           WITH cd3, wordCount2, cat2, p
+                           MERGE (p)-[:FACTDETECT_HAS_PRODUCT]-(cd3)
+                           MERGE (p)-[:FACT_HAS_PRODUCT {DetectCount:wordCount2}]-(cat2)""".trimMargin()
+
+            var queryBrand = """
+                           MATCH (p:Product)-[:PRODUCT_HAS_DESCRIPTION|:PRODUCT_HAS_PERSIANTITLE|:PRODUCT_HAS_ENGLISHTITLE]-(:Word)-[:NEXT*]-(w3:Word)
+                           WITH p, w3
+                           MATCH (s3:SiteConfiguration)-[:BRAND_IN_SITE]-(c3:Brand)-[:BRANDDEDETECT_IN_BRAND]-(cd3:BrandDetect)
+                           WHERE s3.SiteId = 'a462b94d-687f-486b-9595-065922b09d8b'
+                           WITH split(cd3.Title," ") as d3, c3, cd3, collect(w3.Title) as word, p
+                           WHERE ALL(x in d3 WHERE x in word)
+                           WITH adt.counter(cd3.Title,toString(p.Description + " " + p.FaTitle + " " + p.EnTitle)) as dd, cd3, c3, p
+                           WITH sum(dd) as wordCount3, collect(cd3.Id) as detect3, c3 as cat3, p
+                           //WITH split(cd3.Title," ") as d3, c3, cd3, w3, p
+                           //WHERE all(x in d3 WHERE x in w3.Title)
+                           //WITH count(w3) as wordCount3, c3 as cat3, collect(DISTINCT cd3.Id) as detect3, p
+                           MATCH (cd4:BrandDetect)
+                           WHERE cd4.Id in detect3
+                           WITH cd4, p, cat3, wordCount3
+                           OPTIONAL MATCH (p)-[r:BRANDDETECT_HAS_PRODUCT]-(:BrandDetect)
+                           DELETE r
+                           WITH cd4, p, cat3, wordCount3
+                           OPTIONAL MATCH (p)-[r2:PRODUCT_HAS_BRAND]-(:Brand)
+                           DELETE r2
+                           WITH cd4, p, cat3, wordCount3
+                           OPTIONAL MATCH (p)<-[r3:PRODUCT_HAS_MAIN_BRAND]-(:Brand)
+                           DELETE r3
+                           WITH cd4, p, cat3, wordCount3
+                           MERGE (p)-[:BRANDDETECT_HAS_PRODUCT]-(cd4)
+                           MERGE (p)-[:PRODUCT_HAS_BRAND {DetectCount:wordCount3}]-(cat3)
+                           WITH wordCount3, cat3, p order by wordCount3 DESC limit 1
+                           MERGE (cat3)-[:PRODUCT_HAS_MAIN_BRAND {DetectCount:wordCount3}]-(p)""".trimMargin()
+
+            db.execute(query)
+            db.execute(queryFact)
+            db.execute(queryBrand)
+            return true
+        } catch (e: Exception) {
+            log.info("Error: " + e.message)
+            return false
+        }
+    }
+
     fun wordCount(s: String, pattern: String): Int {
 
         var sTemp = s
@@ -386,6 +602,14 @@ class ProcessData {
         return counter
     }
 
+    fun deleteProductRelation(product: Node) {
+
+
+        var queryDelete = """MATCH (p:Product {HashTitle:"${product.getProperty("HashTitle")}"})-[r1:RP_CATEGORY_HAS_PRODUCT|:PRODUCT_HAS_BRAND|:PRODUCT_HAS_FACT|:BRANDDETECT_HAS_PRODUCT|:CATEGORYDETECT_HAS_PRODUCT|:FACTDETECT_HAS_PRODUCT|:PRODUCT_HAS_MAIN_RPCATEGORY|:PRODUCT_HAS_MAIN_BRAND]-(d)
+                             DELETE r1""".trimMargin()
+
+        db.execute(queryDelete)
+    }
 
 }
 
@@ -393,6 +617,11 @@ class DetectCountViewModel(Count: Int, Detect: Node) {
 
     var detect: Node = Detect
     var count: Int = Count
+}
+
+class DetectCount {
+    lateinit var detect: Node
+    var count: Int = 0
 }
 
 class EngineLable {
