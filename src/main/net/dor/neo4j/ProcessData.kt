@@ -21,11 +21,24 @@ import org.neo4j.cypher.internal.`InternalExecutionResult$class`.columns
 import org.neo4j.cypher.internal.compiler.v3_1.codegen.ir.expressions.TypeOf
 import org.neo4j.cypher.internal.frontend.v2_3.ast.functions.Str
 import org.neo4j.graphdb.QueryExecutionType.query
+import java.security.MessageDigest
 import java.util.*
 import javax.management.relation.Relation
 import javax.swing.text.StyledEditorKit
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
+import java.util.UUID
+
+
+private class Sha256Hash {
+    fun hash(data: String): String {
+        val bytes = data.toByteArray()
+        val md = MessageDigest.getInstance("SHA-256")
+        val digest = md.digest(bytes)
+        return digest.fold("", { str, it -> str + "%02x".format(it) })
+    }
+
+}
 
 
 class ProcessData {
@@ -95,12 +108,22 @@ class ProcessData {
     @Context
     lateinit var log: Log
 
-    @UserFunction(name = "adt.hello")
-    fun sayHello(@Name("hello") zz: String): String {
-        return "$zz hello"
+    @UserFunction(name="dor.uuid")
+    @Description("creates an UUID (universally unique id)")
+    fun CreateUUID(): String {
+        return UUID.randomUUID().toString()
     }
 
-    @UserFunction(name = "adt.counter")
+    @UserFunction(name="dor.sha256")
+    @Description("Convert data from string to Sha256 String in a function")
+    fun Sha256Maker(@Name("data")data: String): String{
+        // Note : Neo4j UserFunction only accepts a limited range of types.
+        val h = Sha256Hash()
+        return h.hash(data)
+    }
+
+
+    @UserFunction(name = "dor.counter")
     fun counter(@Name("Detect") pattern: String,@Name("Description") text: String): Number {
         var sTemp = text.toLowerCase()
         var counter = 0
@@ -135,7 +158,7 @@ class ProcessData {
         db.execute(q)
     }
 
-    @Procedure(name = "adt.defineProduct", mode = Mode.WRITE)
+    @Procedure(name = "dor.defineProduct", mode = Mode.WRITE)
     fun defineProduct(@Name("HashTitle") hashTitle: String) {
         val product: Node = db.findNode(EngineLable.productLabel(), "HashTitle", hashTitle)
         var s = analyseProduct(product)
@@ -499,7 +522,7 @@ class ProcessData {
                            MERGE (cat3)-[:PRODUCT_HAS_MAIN_BRAND {DetectCount:wordCount3}]-(p)""".trimMargin()
 
             db.execute(query)
-            
+
             db.execute(queryFact)
             db.execute(queryBrand)
 
