@@ -3,8 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="77dd0837-d925-4bb7-baa7-7990c817fb33" name="Default" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/nansp.iml" beforeDir="false" afterPath="$PROJECT_DIR$/nansp.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/net/dor/neo4j/ProcessData.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/net/dor/neo4j/ProcessData.kt" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/target/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -28,13 +26,19 @@
       <file leaf-file-name="ProcessData.kt" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/net/dor/neo4j/ProcessData.kt">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="187">
-              <caret line="11" column="49" lean-forward="true" selection-start-line="11" selection-start-column="49" selection-end-line="11" selection-end-column="49" />
+            <state relative-caret-position="-663">
+              <caret line="30" column="30" lean-forward="true" selection-start-line="30" selection-start-column="30" selection-end-line="30" selection-end-column="30" />
               <folding>
-                <element signature="n#!!block;n#Relations#0;n#!!block;n#ProcessData#0" />
+                <element signature="e#19#895#0" expanded="true" />
                 <element signature="n#!!block;n#countProductDesc#0;n#!!block;n#ProcessData#0" />
                 <element signature="n#!!block;n#createProduct#0;n#!!block;n#ProcessData#0" />
+                <element signature="n#!!block;n#defineAllProducts#0;n#!!block;n#ProcessData#0" />
                 <element signature="n#!!block;n#defineProductBrand#0;n#!!block;n#ProcessData#0" />
+                <element signature="n#!!block;n#defineProductCategory#0;n#!!block;n#ProcessData#0" />
+                <element signature="n#!!block;n#defineProductFact#0;n#!!block;n#ProcessData#0" />
+                <element signature="n#!!block;n#wordCount#0;n#!!block;n#ProcessData#0" />
+                <element signature="n#!!block;n#DetectCountViewModel#0" />
+                <element signature="n#!!block;n#EngineLable#0" />
               </folding>
             </state>
           </provider>
@@ -75,9 +79,13 @@
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="-10" />
-    <option name="width" value="1350" />
+    <option name="x" value="5" />
+    <option name="y" value="37" />
+    <option name="width" value="1348" />
     <option name="height" value="690" />
+  </component>
+  <component name="ProjectLevelVcsManager">
+    <OptionsSetting value="false" id="Update" />
   </component>
   <component name="ProjectView">
     <navigator proportions="" version="1">
@@ -129,7 +137,7 @@
   <component name="PropertiesComponent">
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../Article/APOC/CryptSha256/CryptSha256" />
     <property name="project.structure.last.edited" value="Modules" />
     <property name="project.structure.proportion" value="0.15" />
     <property name="project.structure.side.proportion" value="0.2" />
@@ -205,7 +213,7 @@
       <workItem from="1526107664273" duration="94996000" />
       <workItem from="1526544501489" duration="201000" />
       <workItem from="1526546952235" duration="17569000" />
-      <workItem from="1526906714277" duration="2340000" />
+      <workItem from="1526906714277" duration="5324000" />
     </task>
     <task id="LOCAL-00001" summary="add Define Product Category Method">
       <created>1525951751116</created>
@@ -228,11 +236,18 @@
       <option name="project" value="LOCAL" />
       <updated>1526816186335</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="add count for categoryDetect(bug)">
+      <created>1526911991624</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1526911991624</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="120858000" />
+    <option name="totallyTimeSpent" value="123842000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-6" y="-6" width="1293" height="693" extended-state="6" />
@@ -299,10 +314,16 @@
         <state relative-caret-position="3723">
           <caret line="371" column="9" selection-start-line="371" selection-start-column="9" selection-end-line="371" selection-end-column="9" />
           <folding>
-            <element signature="n#!!block;n#Relations#0;n#!!block;n#ProcessData#0" />
+            <element signature="e#19#895#0" expanded="true" />
             <element signature="n#!!block;n#countProductDesc#0;n#!!block;n#ProcessData#0" />
             <element signature="n#!!block;n#createProduct#0;n#!!block;n#ProcessData#0" />
+            <element signature="n#!!block;n#defineAllProducts#0;n#!!block;n#ProcessData#0" />
             <element signature="n#!!block;n#defineProductBrand#0;n#!!block;n#ProcessData#0" />
+            <element signature="n#!!block;n#defineProductCategory#0;n#!!block;n#ProcessData#0" />
+            <element signature="n#!!block;n#defineProductFact#0;n#!!block;n#ProcessData#0" />
+            <element signature="n#!!block;n#wordCount#0;n#!!block;n#ProcessData#0" />
+            <element signature="n#!!block;n#DetectCountViewModel#0" />
+            <element signature="n#!!block;n#EngineLable#0" />
           </folding>
         </state>
       </provider>
@@ -319,10 +340,16 @@
         <state relative-caret-position="2618">
           <caret line="140" column="40" selection-start-line="140" selection-start-column="40" selection-end-line="140" selection-end-column="40" />
           <folding>
-            <element signature="n#!!block;n#Relations#0;n#!!block;n#ProcessData#0" />
+            <element signature="e#19#895#0" expanded="true" />
             <element signature="n#!!block;n#countProductDesc#0;n#!!block;n#ProcessData#0" />
             <element signature="n#!!block;n#createProduct#0;n#!!block;n#ProcessData#0" />
+            <element signature="n#!!block;n#defineAllProducts#0;n#!!block;n#ProcessData#0" />
             <element signature="n#!!block;n#defineProductBrand#0;n#!!block;n#ProcessData#0" />
+            <element signature="n#!!block;n#defineProductCategory#0;n#!!block;n#ProcessData#0" />
+            <element signature="n#!!block;n#defineProductFact#0;n#!!block;n#ProcessData#0" />
+            <element signature="n#!!block;n#wordCount#0;n#!!block;n#ProcessData#0" />
+            <element signature="n#!!block;n#DetectCountViewModel#0" />
+            <element signature="n#!!block;n#EngineLable#0" />
           </folding>
         </state>
       </provider>
@@ -339,10 +366,16 @@
         <state relative-caret-position="3146">
           <caret line="143" lean-forward="true" selection-start-line="143" selection-end-line="143" />
           <folding>
-            <element signature="n#!!block;n#Relations#0;n#!!block;n#ProcessData#0" />
+            <element signature="e#19#895#0" expanded="true" />
             <element signature="n#!!block;n#countProductDesc#0;n#!!block;n#ProcessData#0" />
             <element signature="n#!!block;n#createProduct#0;n#!!block;n#ProcessData#0" />
+            <element signature="n#!!block;n#defineAllProducts#0;n#!!block;n#ProcessData#0" />
             <element signature="n#!!block;n#defineProductBrand#0;n#!!block;n#ProcessData#0" />
+            <element signature="n#!!block;n#defineProductCategory#0;n#!!block;n#ProcessData#0" />
+            <element signature="n#!!block;n#defineProductFact#0;n#!!block;n#ProcessData#0" />
+            <element signature="n#!!block;n#wordCount#0;n#!!block;n#ProcessData#0" />
+            <element signature="n#!!block;n#DetectCountViewModel#0" />
+            <element signature="n#!!block;n#EngineLable#0" />
           </folding>
         </state>
       </provider>
@@ -366,13 +399,19 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/net/dor/neo4j/ProcessData.kt">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="187">
-          <caret line="11" column="49" lean-forward="true" selection-start-line="11" selection-start-column="49" selection-end-line="11" selection-end-column="49" />
+        <state relative-caret-position="-663">
+          <caret line="30" column="30" lean-forward="true" selection-start-line="30" selection-start-column="30" selection-end-line="30" selection-end-column="30" />
           <folding>
-            <element signature="n#!!block;n#Relations#0;n#!!block;n#ProcessData#0" />
+            <element signature="e#19#895#0" expanded="true" />
             <element signature="n#!!block;n#countProductDesc#0;n#!!block;n#ProcessData#0" />
             <element signature="n#!!block;n#createProduct#0;n#!!block;n#ProcessData#0" />
+            <element signature="n#!!block;n#defineAllProducts#0;n#!!block;n#ProcessData#0" />
             <element signature="n#!!block;n#defineProductBrand#0;n#!!block;n#ProcessData#0" />
+            <element signature="n#!!block;n#defineProductCategory#0;n#!!block;n#ProcessData#0" />
+            <element signature="n#!!block;n#defineProductFact#0;n#!!block;n#ProcessData#0" />
+            <element signature="n#!!block;n#wordCount#0;n#!!block;n#ProcessData#0" />
+            <element signature="n#!!block;n#DetectCountViewModel#0" />
+            <element signature="n#!!block;n#EngineLable#0" />
           </folding>
         </state>
       </provider>
