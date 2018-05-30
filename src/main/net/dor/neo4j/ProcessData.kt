@@ -416,7 +416,7 @@ class ProcessData {
 
 //            deleteProductRelation(product)
 
-            var query = """MATCH (p:Product {HashTitle:'${product.getProperty("HashTitle")}'} )-[:PRODUCT_HAS_DESCRIPTION|:PRODUCT_HAS_PERSIANTITLE|:PRODUCT_HAS_ENGLISHTITLE]-(:Word)-[:NEXT*]-(w:Word)
+            var query = """MATCH (p:Product {HashTitle:'${product.getProperty("HashTitle")}'} )-[:PRODUCT_HAS_DESCRIPTION|:PRODUCT_HAS_PERSIANTITLE|:PRODUCT_HAS_ENGLISHTITLE]-(:Word)-[:NEXT*0..]-(w:Word)
                            WITH w, p
                            MATCH (s:SiteConfiguration)-[:RP_CATEGORY_IN_SITE]-(c:RPCategory)-[:CATEGORYDETECT_IN_RPCATEGORY]-(cd:CategoryDetect)
                            WHERE s.SiteId = 'a462b94d-687f-486b-9595-065922b09d8b'
@@ -442,11 +442,14 @@ class ProcessData {
                            WITH wordCount, cat, p  order by wordCount DESC limit 1
                            MERGE (cat)-[:PRODUCT_HAS_MAIN_RPCATEGORY {DetectCount:wordCount}]-(p)
                            """.trimMargin()
+            
 
             var queryFact = """
-                           MATCH (p:Product {HashTitle:'${product.getProperty("HashTitle")}'})-[:PRODUCT_HAS_DESCRIPTION|:PRODUCT_HAS_PERSIANTITLE|:PRODUCT_HAS_ENGLISHTITLE]-(:Word)-[:NEXT*]-(w2:Word)
+                           MATCH (p:Product {HashTitle:'${product.getProperty("HashTitle")}'})-[:PRODUCT_HAS_DESCRIPTION|:PRODUCT_HAS_PERSIANTITLE|:PRODUCT_HAS_ENGLISHTITLE]-(:Word)-[:NEXT*0..]-(w2:Word)
                            WITH w2, p
-                           MATCH (p)-[:PRODUCT_HAS_MAIN_RPCATEGORY]-(rp:RPCategory)-[:FACT_HAS_CATEGORY]-(c2:Fact)-[:FACTDETECT_HAS_FACT]-(cd2:FactDetect)
+                           MATCH (p)-[:PRODUCT_HAS_MAIN_RPCATEGORY]-(rp:RPCategory)-[:RPC_IS_RPC_CHILD*0..]->(rp2:RPCategory)
+                           WITH p,w2,rp2
+                           MATCH (rp2)-[:SPEC_HAS_CATEGORY]-(:Spec)-[:FACTDETECT_IN_SPEC]-(cd2:FactDetect)-[:FACTDETECT_HAS_FACT]-(c2:Fact)
                            WITH split(cd2.Title," ") as d3, c2, cd2, collect(w2.Title) as word, p
                            WHERE ALL(x in d3 WHERE x in word)
                            WITH adt.counter(cd2.Title,toString(p.Description + " " + p.FaTitle + " " + p.EnTitle)) as dd, cd2, c2, p
@@ -467,7 +470,7 @@ class ProcessData {
                            MERGE (p)-[:FACT_HAS_PRODUCT {DetectCount:wordCount2}]-(cat2)""".trimMargin()
 
             var queryBrand = """
-                           MATCH (p:Product {HashTitle:'${product.getProperty("HashTitle")}'})-[:PRODUCT_HAS_DESCRIPTION|:PRODUCT_HAS_PERSIANTITLE|:PRODUCT_HAS_ENGLISHTITLE]-(:Word)-[:NEXT*]-(w3:Word)
+                           MATCH (p:Product {HashTitle:'${product.getProperty("HashTitle")}'})-[:PRODUCT_HAS_DESCRIPTION|:PRODUCT_HAS_PERSIANTITLE|:PRODUCT_HAS_ENGLISHTITLE]-(:Word)-[:NEXT*0..]-(w3:Word)
                            WITH p, w3
                            MATCH (s3:SiteConfiguration)-[:BRAND_IN_SITE]-(c3:Brand)-[:BRANDDEDETECT_IN_BRAND]-(cd3:BrandDetect)
                            WHERE s3.SiteId = 'a462b94d-687f-486b-9595-065922b09d8b'
