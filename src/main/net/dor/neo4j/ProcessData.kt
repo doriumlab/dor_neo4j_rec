@@ -442,7 +442,7 @@ class ProcessData {
                            WITH wordCount, cat, p  order by wordCount DESC limit 1
                            MERGE (cat)-[:PRODUCT_HAS_MAIN_RPCATEGORY {DetectCount:wordCount}]-(p)
                            """.trimMargin()
-            
+
 
             var queryFact = """
                            MATCH (p:Product {HashTitle:'${product.getProperty("HashTitle")}'})-[:PRODUCT_HAS_DESCRIPTION|:PRODUCT_HAS_PERSIANTITLE|:PRODUCT_HAS_ENGLISHTITLE]-(:Word)-[:NEXT*0..]-(w2:Word)
