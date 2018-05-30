@@ -26,7 +26,7 @@ import javax.management.relation.Relation
 import javax.swing.text.StyledEditorKit
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
-
+import java.util.UUID
 
 class ProcessData {
 
@@ -95,12 +95,13 @@ class ProcessData {
     @Context
     lateinit var log: Log
 
-    @UserFunction(name = "adt.hello")
-    fun sayHello(@Name("hello") zz: String): String {
-        return "$zz hello"
+    @UserFunction(name="dor.uuid")
+    @Description("creates an UUID (universally unique id)")
+    fun uuid(): String {
+        return UUID.randomUUID().toString()
     }
 
-    @UserFunction(name = "adt.counter")
+    @UserFunction(name = "dor.counter")
     fun counter(@Name("Detect") pattern: String,@Name("Description") text: String): Number {
         var sTemp = text.toLowerCase()
         var counter = 0
@@ -135,7 +136,7 @@ class ProcessData {
         db.execute(q)
     }
 
-    @Procedure(name = "adt.defineProduct", mode = Mode.WRITE)
+    @Procedure(name = "dor.defineProduct", mode = Mode.WRITE)
     fun defineProduct(@Name("HashTitle") hashTitle: String) {
         val product: Node = db.findNode(EngineLable.productLabel(), "HashTitle", hashTitle)
         var s = analyseProduct(product)
@@ -496,7 +497,7 @@ class ProcessData {
                            MERGE (cat3)-[:PRODUCT_HAS_MAIN_BRAND {DetectCount:wordCount3}]-(p)""".trimMargin()
 
             db.execute(query)
-            
+
             db.execute(queryFact)
             db.execute(queryBrand)
 
