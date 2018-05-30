@@ -21,7 +21,6 @@ import org.neo4j.cypher.internal.`InternalExecutionResult$class`.columns
 import org.neo4j.cypher.internal.compiler.v3_1.codegen.ir.expressions.TypeOf
 import org.neo4j.cypher.internal.frontend.v2_3.ast.functions.Str
 import org.neo4j.graphdb.QueryExecutionType.query
-import java.security.MessageDigest
 import java.util.*
 import javax.management.relation.Relation
 import javax.swing.text.StyledEditorKit
@@ -101,22 +100,8 @@ class ProcessData {
         return "$zz hello"
     }
 
-    @UserFunction(name = "adt.convertToSHA256")
-    fun covertToSHA256(@Name("Title") Title: String): String {
-        val bytes = Title.toByteArray()
-        val md = MessageDigest.getInstance("SHA-256")
-        val digest = md.digest(bytes)
-        return digest.fold("", { str, it -> str + "%02x".format(it) })
-    }
-
-    @UserFunction(name = "adt.generateUUID")
-    fun generateUUID(): String{
-        val uuid : String = UUID.randomUUID().toString()
-        return  uuid
-    }
-
     @UserFunction(name = "adt.counter")
-    fun counter(@Name("Detect") pattern: String, @Name("Description") text: String): Number {
+    fun counter(@Name("Detect") pattern: String,@Name("Description") text: String): Number {
         var sTemp = text.toLowerCase()
         var counter = 0
 
@@ -129,7 +114,7 @@ class ProcessData {
         return counter
     }
 
-    @Procedure(name = "adt.createProduct")
+    @Procedure(name = "dor.createProduct")
     fun createProduct(@Name("Product") product : Any) {
 
         product as Product
@@ -157,8 +142,8 @@ class ProcessData {
         log.info("status: " + s.toString())
     }
 
-    @Procedure(name = "adt.defineAllProducts", mode = Mode.WRITE)
-    fun defineAllProducts() {
+    @Procedure(name = "dor.defineAllProducts", mode = Mode.WRITE)
+    fun defineAllProducts(){
         try {
 
             val startTime = System.currentTimeMillis()
