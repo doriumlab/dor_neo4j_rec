@@ -21,6 +21,7 @@ import org.neo4j.cypher.internal.`InternalExecutionResult$class`.columns
 import org.neo4j.cypher.internal.compiler.v3_1.codegen.ir.expressions.TypeOf
 import org.neo4j.cypher.internal.frontend.v2_3.ast.functions.Str
 import org.neo4j.graphdb.QueryExecutionType.query
+import java.security.MessageDigest
 import java.util.*
 import javax.management.relation.Relation
 import javax.swing.text.StyledEditorKit
@@ -100,8 +101,22 @@ class ProcessData {
         return "$zz hello"
     }
 
+    @UserFunction(name = "adt.convertToSHA256")
+    fun covertToSHA256(@Name("Title") Title: String): String {
+        val bytes = Title.toByteArray()
+        val md = MessageDigest.getInstance("SHA-256")
+        val digest = md.digest(bytes)
+        return digest.fold("", { str, it -> str + "%02x".format(it) })
+    }
+
+    @UserFunction(name = "adt.generateUUID")
+    fun generateUUID(): String{
+        val uuid : String = UUID.randomUUID().toString()
+        return  uuid
+    }
+
     @UserFunction(name = "adt.counter")
-    fun counter(@Name("Detect") pattern: String,@Name("Description") text: String): Number {
+    fun counter(@Name("Detect") pattern: String, @Name("Description") text: String): Number {
         var sTemp = text.toLowerCase()
         var counter = 0
 
@@ -115,12 +130,23 @@ class ProcessData {
     }
 
     @Procedure(name = "adt.createProduct")
-    fun createProduct() {
-        val q = "Create (c:Product { product })\n" +
-                "With c\n" +
-                "Match (rs:RS)\n" +
-                "Where rs.SiteId = \"50cfc9e8-402b-495b-8ed4-66dcb2b3aadd\"\n" +
-                "Create Unique (rs)<-[:${Relations.PRODUCT_IN_RS.toString()}]-(c)"
+    fun createProduct(@Name("Product") product : Any) {
+
+        product as Product
+
+        val q = """CREATE (c:Product { product })
+                   WITH c
+                   MATCH (rs:RS)
+                   WHERE rs.SiteId = "50cfc9e8-402b-495b-8ed4-66dcb2b3aadd"
+                   CREATE Unique (rs)<-[:${Relations.PRODUCT_IN_RS.toString()}]-(c)
+                   WITH c
+                   WITH SPLIT(c.Description," ") as words, c
+                   UNWIND range(0,size(words)-2) as idx
+                   MERGE (w1:Word {Title:words[idx],HashTitle: adt.covertToSHA256(words[idx]), Id:adt.generateUUID()})
+                   MERGE (w2:Word {Title:words[idx+1]})
+                   MERGE (w1)-[:NEXT]->(w2)
+                   """.trimMargin()
+
         db.execute(q)
     }
 
@@ -132,7 +158,7 @@ class ProcessData {
     }
 
     @Procedure(name = "adt.defineAllProducts", mode = Mode.WRITE)
-    fun defineAllProducts(){
+    fun defineAllProducts() {
         try {
 
             val startTime = System.currentTimeMillis()
@@ -628,4 +654,14 @@ class EngineLable {
     companion object {
         fun productLabel(): Label = Label.label("Product")
     }
+}
+
+class Product {
+    var FaTitle: String = ""
+    var EnTitle: String = ""
+    var HashTitle: String = ""
+    var Price: String = ""
+    var ImagePath: String = ""
+    var Description: String = ""
+    var CreatedDate = null
 }
