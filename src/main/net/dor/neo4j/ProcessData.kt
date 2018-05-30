@@ -21,12 +21,25 @@ import org.neo4j.cypher.internal.`InternalExecutionResult$class`.columns
 import org.neo4j.cypher.internal.compiler.v3_1.codegen.ir.expressions.TypeOf
 import org.neo4j.cypher.internal.frontend.v2_3.ast.functions.Str
 import org.neo4j.graphdb.QueryExecutionType.query
+import java.security.MessageDigest
 import java.util.*
 import javax.management.relation.Relation
 import javax.swing.text.StyledEditorKit
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 import java.util.UUID
+
+
+private class Sha256Hash {
+    fun hash(data: String): String {
+        val bytes = data.toByteArray()
+        val md = MessageDigest.getInstance("SHA-256")
+        val digest = md.digest(bytes)
+        return digest.fold("", { str, it -> str + "%02x".format(it) })
+    }
+
+}
+
 
 class ProcessData {
 
@@ -97,9 +110,18 @@ class ProcessData {
 
     @UserFunction(name="dor.uuid")
     @Description("creates an UUID (universally unique id)")
-    fun uuid(): String {
+    fun CreateUUID(): String {
         return UUID.randomUUID().toString()
     }
+
+    @UserFunction(name="dor.sha256")
+    @Description("Convert data from string to Sha256 String in a function")
+    fun Sha256Maker(@Name("data")data: String): String{
+        // Note : Neo4j UserFunction only accepts a limited range of types.
+        val h = Sha256Hash()
+        return h.hash(data)
+    }
+
 
     @UserFunction(name = "dor.counter")
     fun counter(@Name("Detect") pattern: String,@Name("Description") text: String): Number {

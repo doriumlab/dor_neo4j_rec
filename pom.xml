@@ -6,7 +6,7 @@
 
     <groupId>net.auditore.neo4j.sp</groupId>
     <artifactId>nansp</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0-dorlab</version>
 
     <properties>
         <neo4j.version>3.3.4</neo4j.version>
