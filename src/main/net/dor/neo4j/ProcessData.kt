@@ -95,12 +95,12 @@ class ProcessData {
     @Context
     lateinit var log: Log
 
-    @UserFunction(name = "adt.hello")
+    @UserFunction(name = "dor.hello")
     fun sayHello(@Name("hello") zz: String): String {
         return "$zz hello"
     }
 
-    @UserFunction(name = "adt.counter")
+    @UserFunction(name = "dor.counter")
     fun counter(@Name("Detect") pattern: String,@Name("Description") text: String): Number {
         var sTemp = text.toLowerCase()
         var counter = 0
@@ -114,7 +114,7 @@ class ProcessData {
         return counter
     }
 
-    @Procedure(name = "adt.createProduct")
+    @Procedure(name = "dor.createProduct")
     fun createProduct() {
         val q = "Create (c:Product { product })\n" +
                 "With c\n" +
@@ -124,14 +124,14 @@ class ProcessData {
         db.execute(q)
     }
 
-    @Procedure(name = "adt.defineProduct", mode = Mode.WRITE)
+    @Procedure(name = "dor.defineProduct", mode = Mode.WRITE)
     fun defineProduct(@Name("HashTitle") hashTitle: String) {
         val product: Node = db.findNode(EngineLable.productLabel(), "HashTitle", hashTitle)
-        var s = analyseProduct(product)
+        val s = analyseProduct(product)
         log.info("status: " + s.toString())
     }
 
-    @Procedure(name = "adt.defineAllProducts", mode = Mode.WRITE)
+    @Procedure(name = "dor.defineAllProducts", mode = Mode.WRITE)
     fun defineAllProducts(){
         try {
 
@@ -171,17 +171,17 @@ class ProcessData {
 
             val brandDetectCountList = mutableListOf<DetectCountViewModel>()
 
-            val oldRelBrand: Iterable<Relationship> = product.getRelationships(RelationshipType { Relations.PRODUCT_HAS_BRAND.toString() }, Direction.OUTGOING)
+            val oldRelBrand: Iterable<Relationship> = product.getRelationships({ Relations.PRODUCT_HAS_BRAND.toString() }, Direction.OUTGOING)
             oldRelBrand.forEach {
                 it.delete()
             }
 
-            val oldRelBrandDetect: Iterable<Relationship> = product.getRelationships(RelationshipType { Relations.BRANDDETECT_HAS_PRODUCT.toString() }, Direction.OUTGOING)
+            val oldRelBrandDetect: Iterable<Relationship> = product.getRelationships({ Relations.BRANDDETECT_HAS_PRODUCT.toString() }, Direction.OUTGOING)
             oldRelBrandDetect.forEach {
                 it.delete()
             }
 
-            val oldRel: Iterable<Relationship> = product.getRelationships(RelationshipType { Relations.PRODUCT_HAS_MAIN_BRAND.toString() }, Direction.INCOMING)
+            val oldRel: Iterable<Relationship> = product.getRelationships({ Relations.PRODUCT_HAS_MAIN_BRAND.toString() }, Direction.INCOMING)
             oldRel.forEach {
                 it.delete()
             }
@@ -193,18 +193,18 @@ class ProcessData {
                     val brand: Node = row.get("brand") as Node
                     @Suppress("UNCHECKED_CAST")
                     val brandDetect: Iterable<Node> = row.get("brandDetect") as Iterable<Node>
-                    var count: Int = 0
+                    var count = 0
 
                     brandDetect.forEach {
                         val wordCount: Int = wordCount(productContent, it.getProperty("Title").toString())
 
-                        val productToBrandDetectRel: Relationship = product.createRelationshipTo(it, RelationshipType { Relations.BRANDDETECT_HAS_PRODUCT.toString() })
+                        val productToBrandDetectRel: Relationship = product.createRelationshipTo(it, { Relations.BRANDDETECT_HAS_PRODUCT.toString() })
                         productToBrandDetectRel.setProperty("DetectCount", wordCount)
 
                         count += wordCount
                     }
 
-                    val rel: Relationship = product.createRelationshipTo(brand, RelationshipType { Relations.PRODUCT_HAS_BRAND.toString() })
+                    val rel: Relationship = product.createRelationshipTo(brand, { Relations.PRODUCT_HAS_BRAND.toString() })
                     rel.setProperty("DetectCount", count)
 
                     val detectInstanse = DetectCountViewModel(count, brand)
@@ -217,7 +217,7 @@ class ProcessData {
 
             if (maxBrandDetectElemnt != null) {
 
-                maxBrandDetectElemnt.detect.createRelationshipTo(product, RelationshipType { Relations.PRODUCT_HAS_MAIN_BRAND.toString() })
+                maxBrandDetectElemnt.detect.createRelationshipTo(product, { Relations.PRODUCT_HAS_MAIN_BRAND.toString() })
             }
 
             return maxBrandDetectElemnt?.detect
@@ -269,17 +269,17 @@ class ProcessData {
 
             val brandDetectCountList = mutableListOf<DetectCountViewModel>()
 
-            val oldRelCategory: Iterable<Relationship> = product.getRelationships(RelationshipType { Relations.RP_CATEGORY_HAS_PRODUCT.toString() }, Direction.OUTGOING)
+            val oldRelCategory: Iterable<Relationship> = product.getRelationships({ Relations.RP_CATEGORY_HAS_PRODUCT.toString() }, Direction.OUTGOING)
             oldRelCategory.forEach {
                 it.delete()
             }
 
-            val oldRelCategoryDetect: Iterable<Relationship> = product.getRelationships(RelationshipType { Relations.CATEGORYDETECT_HAS_PRODUCT.toString() }, Direction.OUTGOING)
+            val oldRelCategoryDetect: Iterable<Relationship> = product.getRelationships({ Relations.CATEGORYDETECT_HAS_PRODUCT.toString() }, Direction.OUTGOING)
             oldRelCategoryDetect.forEach {
                 it.delete()
             }
 
-            val oldRel: Iterable<Relationship> = product.getRelationships(RelationshipType { Relations.PRODUCT_HAS_MAIN_RPCATEGORY.toString() }, Direction.INCOMING)
+            val oldRel: Iterable<Relationship> = product.getRelationships({ Relations.PRODUCT_HAS_MAIN_RPCATEGORY.toString() }, Direction.INCOMING)
             oldRel.forEach {
                 it.delete()
             }
@@ -315,7 +315,7 @@ class ProcessData {
             val maxBrandDetectElemnt: DetectCountViewModel? = brandDetectCountList.maxBy { it.count }
             if (maxBrandDetectElemnt != null) {
 
-                maxBrandDetectElemnt.detect.createRelationshipTo(product, RelationshipType { Relations.PRODUCT_HAS_MAIN_RPCATEGORY.toString() })
+                maxBrandDetectElemnt.detect.createRelationshipTo(product, { Relations.PRODUCT_HAS_MAIN_RPCATEGORY.toString() })
             }
 
             return maxBrandDetectElemnt?.detect
@@ -351,12 +351,12 @@ class ProcessData {
 
                 val brandDetectCountList = mutableListOf<DetectCountViewModel>()
 
-                val oldRelFact: Iterable<Relationship> = product.getRelationships(RelationshipType { Relations.FACT_HAS_PRODUCT.toString() }, Direction.OUTGOING)
+                val oldRelFact: Iterable<Relationship> = product.getRelationships({ Relations.FACT_HAS_PRODUCT.toString() }, Direction.OUTGOING)
                 oldRelFact.forEach {
                     it.delete()
                 }
 
-                val oldRelFactDetect: Iterable<Relationship> = product.getRelationships(RelationshipType { Relations.FACTDETECT_HAS_PRODUCT.toString() }, Direction.OUTGOING)
+                val oldRelFactDetect: Iterable<Relationship> = product.getRelationships({ Relations.FACTDETECT_HAS_PRODUCT.toString() }, Direction.OUTGOING)
                 oldRelFactDetect.forEach {
                     it.delete()
                 }
@@ -368,12 +368,12 @@ class ProcessData {
                         val brand: Node = row.get("fact") as Node
                         @Suppress("UNCHECKED_CAST")
                         val brandDetect: Iterable<Node> = row.get("factDetect") as Iterable<Node>
-                        var count: Int = 0
+                        var count = 0
 
                         brandDetect.forEach {
                             val wordCount: Int = wordCount(productContent, it.getProperty("Title").toString())
 
-                            val productToBrandDetectRel: Relationship = product.createRelationshipTo(it, RelationshipType { Relations.FACTDETECT_HAS_PRODUCT.toString() })
+                            val productToBrandDetectRel: Relationship = product.createRelationshipTo(it, { Relations.FACTDETECT_HAS_PRODUCT.toString() })
                             productToBrandDetectRel.setProperty("DetectCount", wordCount)
 
                             log.info("word")
@@ -381,7 +381,7 @@ class ProcessData {
                             count += wordCount
                         }
 
-                        val rel: Relationship = product.createRelationshipTo(brand, RelationshipType { Relations.FACT_HAS_PRODUCT.toString() })
+                        val rel: Relationship = product.createRelationshipTo(brand, { Relations.FACT_HAS_PRODUCT.toString() })
                         rel.setProperty("DetectCount", count)
 
                         val detectInstanse = DetectCountViewModel(count, brand)
@@ -405,14 +405,14 @@ class ProcessData {
 
 //            deleteProductRelation(product)
 
-            var query = """MATCH (p:Product {HashTitle:'${product.getProperty("HashTitle")}'} )-[:PRODUCT_HAS_DESCRIPTION|:PRODUCT_HAS_PERSIANTITLE|:PRODUCT_HAS_ENGLISHTITLE]-(:Word)-[:NEXT*]-(w:Word)
+            val query = """MATCH (p:Product {HashTitle:'${product.getProperty("HashTitle")}'} )-[:PRODUCT_HAS_DESCRIPTION|:PRODUCT_HAS_PERSIANTITLE|:PRODUCT_HAS_ENGLISHTITLE]-(:Word)-[:NEXT*]-(w:Word)
                            WITH w, p
                            MATCH (s:SiteConfiguration)-[:RP_CATEGORY_IN_SITE]-(c:RPCategory)-[:CATEGORYDETECT_IN_RPCATEGORY]-(cd:CategoryDetect)
                            WHERE s.SiteId = 'a462b94d-687f-486b-9595-065922b09d8b'
                            WITH split(cd.Title," ") as d, c, cd, collect(w.Title) as word, p
                            WHERE ALL(x in d WHERE x in word)
                           // WITH count(w) as wordCount,c as cat,collect(DISTINCT cd.Id) as detect, p
-                          WITH adt.counter(cd.Title,toString(p.Description + " " + p.FaTitle + " " + p.EnTitle)) as dd, cd, c, p
+                          WITH dor.counter(cd.Title,toString(p.Description + " " + p.FaTitle + " " + p.EnTitle)) as dd, cd, c, p
                           WITH sum(dd) as wordCount, collect(cd.Id) as detect, c as cat, p
                            MATCH (cd2:CategoryDetect)
                            WHERE cd2.Id in detect
@@ -432,13 +432,13 @@ class ProcessData {
                            MERGE (cat)-[:PRODUCT_HAS_MAIN_RPCATEGORY {DetectCount:wordCount}]-(p)
                            """.trimMargin()
 
-            var queryFact = """
+            val queryFact = """
                            MATCH (p:Product {HashTitle:'${product.getProperty("HashTitle")}'})-[:PRODUCT_HAS_DESCRIPTION|:PRODUCT_HAS_PERSIANTITLE|:PRODUCT_HAS_ENGLISHTITLE]-(:Word)-[:NEXT*]-(w2:Word)
                            WITH w2, p
                            MATCH (p)-[:PRODUCT_HAS_MAIN_RPCATEGORY]-(rp:RPCategory)-[:FACT_HAS_CATEGORY]-(c2:Fact)-[:FACTDETECT_HAS_FACT]-(cd2:FactDetect)
                            WITH split(cd2.Title," ") as d3, c2, cd2, collect(w2.Title) as word, p
                            WHERE ALL(x in d3 WHERE x in word)
-                           WITH adt.counter(cd2.Title,toString(p.Description + " " + p.FaTitle + " " + p.EnTitle)) as dd, cd2, c2, p
+                           WITH dor.counter(cd2.Title,toString(p.Description + " " + p.FaTitle + " " + p.EnTitle)) as dd, cd2, c2, p
                            WITH sum(dd) as wordCount2, collect(cd2.Id) as detect2, c2 as cat2, p
                            //WITH split(cd2.Title," ") as d2, c2, cd2, p, w2
                            //WHERE all(x in d2 WHERE x in w2.Title)
@@ -455,14 +455,14 @@ class ProcessData {
                            MERGE (p)-[:FACTDETECT_HAS_PRODUCT]-(cd3)
                            MERGE (p)-[:FACT_HAS_PRODUCT {DetectCount:wordCount2}]-(cat2)""".trimMargin()
 
-            var queryBrand = """
+            val queryBrand = """
                            MATCH (p:Product {HashTitle:'${product.getProperty("HashTitle")}'})-[:PRODUCT_HAS_DESCRIPTION|:PRODUCT_HAS_PERSIANTITLE|:PRODUCT_HAS_ENGLISHTITLE]-(:Word)-[:NEXT*]-(w3:Word)
                            WITH p, w3
                            MATCH (s3:SiteConfiguration)-[:BRAND_IN_SITE]-(c3:Brand)-[:BRANDDEDETECT_IN_BRAND]-(cd3:BrandDetect)
                            WHERE s3.SiteId = 'a462b94d-687f-486b-9595-065922b09d8b'
                            WITH split(cd3.Title," ") as d3, c3, cd3, collect(w3.Title) as word, p
                            WHERE ALL(x in d3 WHERE x in word)
-                           WITH adt.counter(cd3.Title,toString(p.Description + " " + p.FaTitle + " " + p.EnTitle)) as dd, cd3, c3, p
+                           WITH dor.counter(cd3.Title,toString(p.Description + " " + p.FaTitle + " " + p.EnTitle)) as dd, cd3, c3, p
                            WITH sum(dd) as wordCount3, collect(cd3.Id) as detect3, c3 as cat3, p
                            //WITH split(cd3.Title," ") as d3, c3, cd3, w3, p
                            //WHERE all(x in d3 WHERE x in w3.Title)
@@ -499,14 +499,14 @@ class ProcessData {
     private fun analyseAllProduct(): Boolean {
         try {
 
-            var query = """MATCH (p:Product)-[:PRODUCT_HAS_DESCRIPTION|:PRODUCT_HAS_PERSIANTITLE|:PRODUCT_HAS_ENGLISHTITLE]-(:Word)-[:NEXT*]-(w:Word)
+            val query = """MATCH (p:Product)-[:PRODUCT_HAS_DESCRIPTION|:PRODUCT_HAS_PERSIANTITLE|:PRODUCT_HAS_ENGLISHTITLE]-(:Word)-[:NEXT*]-(w:Word)
                            WITH w, p
                            MATCH (s:SiteConfiguration)-[:RP_CATEGORY_IN_SITE]-(c:RPCategory)-[:CATEGORYDETECT_IN_RPCATEGORY]-(cd:CategoryDetect)
                            WHERE s.SiteId = 'a462b94d-687f-486b-9595-065922b09d8b'
                            WITH split(cd.Title," ") as d, c, cd, collect(w.Title) as word, p
                            WHERE ALL(x in d WHERE x in word)
                           // WITH count(w) as wordCount,c as cat,collect(DISTINCT cd.Id) as detect, p
-                          WITH adt.counter(cd.Title,toString(p.Description + " " + p.FaTitle + " " + p.EnTitle)) as dd, cd, c, p
+                          WITH dor.counter(cd.Title,toString(p.Description + " " + p.FaTitle + " " + p.EnTitle)) as dd, cd, c, p
                           WITH sum(dd) as wordCount, collect(cd.Id) as detect, c as cat, p
                            MATCH (cd2:CategoryDetect)
                            WHERE cd2.Id in detect
@@ -526,13 +526,13 @@ class ProcessData {
                            MERGE (cat)-[:PRODUCT_HAS_MAIN_RPCATEGORY {DetectCount:wordCount}]-(p)
                            """.trimMargin()
 
-            var queryFact = """
+            val queryFact = """
                            MATCH (p:Product)-[:PRODUCT_HAS_DESCRIPTION|:PRODUCT_HAS_PERSIANTITLE|:PRODUCT_HAS_ENGLISHTITLE]-(:Word)-[:NEXT*]-(w2:Word)
                            WITH w2, p
                            MATCH (p)-[:PRODUCT_HAS_MAIN_RPCATEGORY]-(rp:RPCategory)-[:FACT_HAS_CATEGORY]-(c2:Fact)-[:FACTDETECT_IN_FACT]-(cd2:FactDetect)
                            WITH split(cd2.Title," ") as d3, c2, cd2, collect(w2.Title) as word, p
                            WHERE ALL(x in d3 WHERE x in word)
-                           WITH adt.counter(cd2.Title,toString(p.Description + " " + p.FaTitle + " " + p.EnTitle)) as dd, cd2, c2, p
+                           WITH dor.counter(cd2.Title,toString(p.Description + " " + p.FaTitle + " " + p.EnTitle)) as dd, cd2, c2, p
                            WITH sum(dd) as wordCount2, collect(cd2.Id) as detect2, c2 as cat2, p
                            //WITH split(cd2.Title," ") as d2, c2, cd2, p, w2
                            //WHERE all(x in d2 WHERE x in w2.Title)
@@ -549,14 +549,14 @@ class ProcessData {
                            MERGE (p)-[:FACTDETECT_HAS_PRODUCT]-(cd3)
                            MERGE (p)-[:FACT_HAS_PRODUCT {DetectCount:wordCount2}]-(cat2)""".trimMargin()
 
-            var queryBrand = """
+            val queryBrand = """
                            MATCH (p:Product)-[:PRODUCT_HAS_DESCRIPTION|:PRODUCT_HAS_PERSIANTITLE|:PRODUCT_HAS_ENGLISHTITLE]-(:Word)-[:NEXT*]-(w3:Word)
                            WITH p, w3
                            MATCH (s3:SiteConfiguration)-[:BRAND_IN_SITE]-(c3:Brand)-[:BRANDDEDETECT_IN_BRAND]-(cd3:BrandDetect)
                            WHERE s3.SiteId = 'a462b94d-687f-486b-9595-065922b09d8b'
                            WITH split(cd3.Title," ") as d3, c3, cd3, collect(w3.Title) as word, p
                            WHERE ALL(x in d3 WHERE x in word)
-                           WITH adt.counter(cd3.Title,toString(p.Description + " " + p.FaTitle + " " + p.EnTitle)) as dd, cd3, c3, p
+                           WITH dor.counter(cd3.Title,toString(p.Description + " " + p.FaTitle + " " + p.EnTitle)) as dd, cd3, c3, p
                            WITH sum(dd) as wordCount3, collect(cd3.Id) as detect3, c3 as cat3, p
                            //WITH split(cd3.Title," ") as d3, c3, cd3, w3, p
                            //WHERE all(x in d3 WHERE x in w3.Title)
@@ -605,7 +605,7 @@ class ProcessData {
     fun deleteProductRelation(product: Node) {
 
 
-        var queryDelete = """MATCH (p:Product {HashTitle:"${product.getProperty("HashTitle")}"})-[r1:RP_CATEGORY_HAS_PRODUCT|:PRODUCT_HAS_BRAND|:PRODUCT_HAS_FACT|:BRANDDETECT_HAS_PRODUCT|:CATEGORYDETECT_HAS_PRODUCT|:FACTDETECT_HAS_PRODUCT|:PRODUCT_HAS_MAIN_RPCATEGORY|:PRODUCT_HAS_MAIN_BRAND]-(d)
+        val queryDelete = """MATCH (p:Product {HashTitle:"${product.getProperty("HashTitle")}"})-[r1:RP_CATEGORY_HAS_PRODUCT|:PRODUCT_HAS_BRAND|:PRODUCT_HAS_FACT|:BRANDDETECT_HAS_PRODUCT|:CATEGORYDETECT_HAS_PRODUCT|:FACTDETECT_HAS_PRODUCT|:PRODUCT_HAS_MAIN_RPCATEGORY|:PRODUCT_HAS_MAIN_BRAND]-(d)
                              DELETE r1""".trimMargin()
 
         db.execute(queryDelete)
