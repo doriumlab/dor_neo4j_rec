@@ -496,6 +496,7 @@ class ProcessData {
                            MERGE (cat3)-[:PRODUCT_HAS_MAIN_BRAND {DetectCount:wordCount3}]-(p)""".trimMargin()
 
             db.execute(query)
+            
             db.execute(queryFact)
             db.execute(queryBrand)
 
