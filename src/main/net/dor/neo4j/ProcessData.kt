@@ -142,6 +142,14 @@ class ProcessData {
 
         product as Product
 
+        val newquery="""
+        WITH split("My phone frequently calls drop frequently with the iPhone"," ") as words
+        UNWIND range(0,size(words)-2) as i
+        merge(w3:Word {name:words[i],hash:dor.sha256(words[i]+i)})
+        merge(w4:Word {name:words[i+1],hash:dor.sha256(words[i+1]+(i+1))})
+        create (w3)-[:NEXT]->(w4)
+         """
+
         val q = """CREATE (c:Product { product })
                    WITH c
                    MATCH (rs:RS)
