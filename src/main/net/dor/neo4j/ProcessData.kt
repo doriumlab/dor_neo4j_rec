@@ -102,6 +102,9 @@ class ProcessData {
         PRODUCT_HAS_MAIN_RPCATEGORY
     }
 
+    val RSId = "50cfc9e8-402b-495b-8ed4-66dcb2b3aadd"
+
+
     @Context
     lateinit var db: GraphDatabaseService
 
@@ -157,7 +160,7 @@ class ProcessData {
             val q = """CREATE (c:Product { FaTitle:"$FaTitle", EnTitle:"$EnTitle", Description:"$Description", Price:"$Price", SourceUrl:"$SourceUrl", ImagePath:"$ImagePath", HashTitle:"$hashFaTitle",Id:"$id" })
                    WITH c
                    MATCH (rs:RS)
-                   WHERE rs.SiteId = "50cfc9e8-402b-495b-8ed4-66dcb2b3aadd"
+                   WHERE rs.SiteId = "$RSId"
                    CREATE UNIQUE (rs)<-[:${Relations.PRODUCT_IN_RS.toString()}]-(c)""".trimMargin()
 
             val descQuery = """
@@ -240,255 +243,6 @@ class ProcessData {
 
     }
 
-    private fun defineProductBrand(hashTitle: String): Node? {
-        try {
-            val product: Node = db.findNode(EngineLable.productLabel(), "HashTitle", hashTitle)
-            val productContent: String = "${product.getProperty("Description")} ${product.getProperty("FaTitle")} ${product.getProperty("EnTitle")}".toLowerCase()
-
-            val query: String = """MATCH (s:SiteConfiguration)-[:${Relations.BRAND_IN_SITE.toString()}]-(c:Brand)-[:${Relations.BRANDDEDETECT_IN_BRAND.toString()}]-(cd:BrandDetect)
-                                   WHERE s.SiteId = 'a462b94d-687f-486b-9595-065922b09d8b'
-                                   WITH c,cd, '$productContent' as productDescription
-                                   WHERE productDescription CONTAINS toString(' ' + cd.Title +' ')
-                                   RETURN c as brand, collect(cd) as brandDetect""".trimMargin()
-//                                   UNION
-//                                   MATCH (s:SiteConfiguration)-[:${Relations.BRAND_IN_SITE.toString()}]-(c:Brand)-[:${Relations.AND_BRANDDEDETECT_IN_BRAND.toString()}]-(cd:BrandDetect)
-//                                   WHERE s.SiteId = 'a462b94d-687f-486b-9595-065922b09d8b'
-//                                   WITH c,cd, '$productContent' as productDescription,collect(cd.Title) as detectTitle, collect(cd.Id) as detectId
-//                                   WHERE all (x IN detectTitle WHERE productDescription CONTAINS toString(' ' + x +' '))
-//                                   WITH c,cd, detectTitle, detectId
-//                                   MATCH (s:SiteConfiguration)-[:${Relations.BRANDDETECT_IN_SITE.toString()}]-(cd2:BrandDetect)
-//                                   WHERE cd2.Id in detectId
-//                                   RETURN c as brand, collect(cd2) as brandDetect
-
-            val brandDetectCountList = mutableListOf<DetectCountViewModel>()
-
-            val oldRelBrand: Iterable<Relationship> = product.getRelationships(RelationshipType { Relations.PRODUCT_HAS_BRAND.toString() }, Direction.OUTGOING)
-            oldRelBrand.forEach {
-                it.delete()
-            }
-
-            val oldRelBrandDetect: Iterable<Relationship> = product.getRelationships(RelationshipType { Relations.BRANDDETECT_HAS_PRODUCT.toString() }, Direction.OUTGOING)
-            oldRelBrandDetect.forEach {
-                it.delete()
-            }
-
-            val oldRel: Iterable<Relationship> = product.getRelationships(RelationshipType { Relations.PRODUCT_HAS_MAIN_BRAND.toString() }, Direction.INCOMING)
-            oldRel.forEach {
-                it.delete()
-            }
-
-            db.execute(query).use({ result ->
-                while (result.hasNext()) {
-                    val row = result.next()
-
-                    val brand: Node = row.get("brand") as Node
-                    @Suppress("UNCHECKED_CAST")
-                    val brandDetect: Iterable<Node> = row.get("brandDetect") as Iterable<Node>
-                    var count: Int = 0
-
-                    brandDetect.forEach {
-                        val wordCount: Int = wordCount(productContent, it.getProperty("Title").toString())
-
-                        val productToBrandDetectRel: Relationship = product.createRelationshipTo(it, RelationshipType { Relations.BRANDDETECT_HAS_PRODUCT.toString() })
-                        productToBrandDetectRel.setProperty("DetectCount", wordCount)
-
-                        count += wordCount
-                    }
-
-                    val rel: Relationship = product.createRelationshipTo(brand, RelationshipType { Relations.PRODUCT_HAS_BRAND.toString() })
-                    rel.setProperty("DetectCount", count)
-
-                    val detectInstanse = DetectCountViewModel(count, brand)
-                    brandDetectCountList.add(detectInstanse)
-                }
-                result.close()
-            })
-
-            val maxBrandDetectElemnt: DetectCountViewModel? = brandDetectCountList.maxBy { it.count }
-
-            if (maxBrandDetectElemnt != null) {
-
-                maxBrandDetectElemnt.detect.createRelationshipTo(product, RelationshipType { Relations.PRODUCT_HAS_MAIN_BRAND.toString() })
-            }
-
-            return maxBrandDetectElemnt?.detect
-        } catch (e: IllegalArgumentException) {
-            log.info("Error: ${e.message.toString()}")
-            return null
-        }
-    }
-
-    private fun defineProductCategory(hashTitle: String): Node? {
-        try {
-            val product: Node = db.findNode(EngineLable.productLabel(), "HashTitle", hashTitle)
-//            val productContent: String = "${product.getProperty("Description")} ${product.getProperty("FaTitle")} ${product.getProperty("EnTitle")}".toLowerCase()
-
-            val query = """MATCH (p:Product {HashTitle:$hashTitle} )-[:${Relations.PRODUCT_HAS_DESCRIPTION}|:${Relations.PRODUCT_HAS_PERSIANTITLE}|:${Relations.PRODUCT_HAS_ENGLISHTITLE}]-(:Word)-[:${Relations.NEXT}*]-(w:Word)
-                           WITH w, p
-                           MATCH (s:SiteConfiguration)-[:${Relations.RP_CATEGORY_IN_SITE}]-(rc:RPCategory)-[:${Relations.CATEGORYDETECT_IN_RPCATEGORY}]-(cd:CategoryDetect)
-                           WHERE s.SiteId = 'a462b94d-687f-486b-9595-065922b09d8b
-                           WITH split(cd.Title," ") as spliteCd, rc, cd, w, p
-                           WHERE all(x in spliteCd WHERE x in w.Title)
-                           WITH count(w) as wordCountRc,rc as cat,collect(DISTINCT cd.Id) as detectRc, p, w
-                           MATCH (cd2:CategoryDetect)
-                           WHERE cd2.Id in detectRc
-                           CREATE UNIQUE (p)-[:${Relations.CATEGORYDETECT_HAS_PRODUCT}]-(cd2)
-                           CREATE UNIQUE (p)-[:${Relations.RP_CATEGORY_HAS_PRODUCT} {DetectCount:wordCount}]-(cat)
-                           WITH max(wordCountRc) as maxWordCount,cat,p limit 1
-                           CREATE UNIQUE (cat)-[:${Relations.PRODUCT_HAS_MAIN_RPCATEGORY} {DetectCount:wordCount}]-(p)
-                           WITH cat,p
-                           MATCH (s:SiteConfiguration)-[:${Relations.RP_CATEGORY_IN_SITE.toString()}]-(rp:RPCategory)-[:${Relations.FACT_HAS_CATEGORY.toString()}]-(f:Fact)-[:${Relations.FACTDETECT_IN_FACT}]-(fd:FactDetect)
-                           WHERE s.SiteId = 'a462b94d-687f-486b-9595-065922b09d8b'
-                           AND rp.Id = cat.Id
-                           WITH split(fd.Title," ") as d2,f,fd
-                           WHERE all(x in d2 WHERE x in w.Title)""".trimMargin()
-
-//            val query: String = """MATCH (s:SiteConfiguration)-[:${Relations.RP_CATEGORY_IN_SITE.toString()}]-(c:RPCategory)-[:${Relations.CATEGORYDETECT_IN_RPCATEGORY.toString()}]-(cd:CategoryDetect)
-//                                   WHERE s.SiteId = 'a462b94d-687f-486b-9595-065922b09d8b'
-//                                   WITH c,cd, '$productContent' as productDescription
-//                                   WHERE productDescription CONTAINS toString(' ' + cd.Title +' ')
-//                                   RETURN c as category, collect(cd) as categoryDetect""".trimMargin()
-//                                   UNION
-//                                   MATCH (s:SiteConfiguration)-[:${Relations.RP_CATEGORY_IN_SITE.toString()}]-(c:RPCategory)-[:${Relations.AND_CATEGORYDETECT_IN_RPCATEGORY.toString()}]-(cd:CategoryDetect)
-//                                   WHERE s.SiteId = 'a462b94d-687f-486b-9595-065922b09d8b'
-//                                   WITH c,cd, '$productContent' as productDescription,collect(cd.Title) as detectTitle, collect(cd.Id) as detectId
-//                                   WHERE all (x IN detectTitle WHERE productDescription CONTAINS toString(' ' + x +' '))
-//                                   WITH c,cd, detectTitle, detectId
-//                                   MATCH (s:SiteConfiguration)-[:${Relations.RP_CATEGORY_IN_SITE.toString()}]-(cd2:CategoryDetect)
-//                                   WHERE cd2.Id in detectId
-//                                   RETURN c as category, collect(cd2) as categoryDetect
-
-            val brandDetectCountList = mutableListOf<DetectCountViewModel>()
-
-            val oldRelCategory: Iterable<Relationship> = product.getRelationships(RelationshipType { Relations.RP_CATEGORY_HAS_PRODUCT.toString() }, Direction.OUTGOING)
-            oldRelCategory.forEach {
-                it.delete()
-            }
-
-            val oldRelCategoryDetect: Iterable<Relationship> = product.getRelationships(RelationshipType { Relations.CATEGORYDETECT_HAS_PRODUCT.toString() }, Direction.OUTGOING)
-            oldRelCategoryDetect.forEach {
-                it.delete()
-            }
-
-            val oldRel: Iterable<Relationship> = product.getRelationships(RelationshipType { Relations.PRODUCT_HAS_MAIN_RPCATEGORY.toString() }, Direction.INCOMING)
-            oldRel.forEach {
-                it.delete()
-            }
-
-//            db.execute(query).use({ result ->
-//                while (result.hasNext()) {
-//                    val row = result.next()
-//
-//                    val brand: Node = row.get("category") as Node
-//                    @Suppress("UNCHECKED_CAST")
-//                    val brandDetect: Iterable<Node> = row.get("categoryDetect") as Iterable<Node>
-//
-//                    var count: Int = 0
-//
-//                    brandDetect.forEach {
-//                        val wordCount: Int = wordCount(productContent, it.getProperty("Title").toString())
-//
-//                        val productToBrandDetectRel: Relationship = product.createRelationshipTo(it, RelationshipType { Relations.CATEGORYDETECT_HAS_PRODUCT.toString() })
-//                        productToBrandDetectRel.setProperty("DetectCount", wordCount)
-//
-//                        count += wordCount
-//                    }
-//
-//                    val rel: Relationship = product.createRelationshipTo(brand, RelationshipType { Relations.RP_CATEGORY_HAS_PRODUCT.toString() })
-//                    rel.setProperty("DetectCount", count)
-//
-//                    val detectInstanse = DetectCountViewModel(count, brand)
-//                    brandDetectCountList.add(detectInstanse)
-//                }
-//                result.close()
-//            })
-            db.execute(query)
-            val maxBrandDetectElemnt: DetectCountViewModel? = brandDetectCountList.maxBy { it.count }
-            if (maxBrandDetectElemnt != null) {
-
-                maxBrandDetectElemnt.detect.createRelationshipTo(product, RelationshipType { Relations.PRODUCT_HAS_MAIN_RPCATEGORY.toString() })
-            }
-
-            return maxBrandDetectElemnt?.detect
-        } catch (e: Exception) {
-            log.info("Error: ${e.message.toString()}")
-            return null
-        }
-    }
-
-    private fun defineProductFact(hashTitle: String, category: Node?): Boolean {
-        try {
-            if (category != null) {
-
-                val product: Node = db.findNode(EngineLable.productLabel(), "HashTitle", hashTitle)
-                val productContent: String = "${product.getProperty("Description")} ${product.getProperty("FaTitle")} ${product.getProperty("EnTitle")}".toLowerCase()
-
-                val query: String = """MATCH (s:SiteConfiguration)-[:${Relations.RP_CATEGORY_IN_SITE.toString()}]-(rp:RPCategory)-[:${Relations.FACT_HAS_CATEGORY.toString()}]-(c:Fact)-[:${Relations.FACTDETECT_IN_FACT}]-(cd:FactDetect)
-                                   WHERE s.SiteId = 'a462b94d-687f-486b-9595-065922b09d8b'
-                                   AND rp.Id = '${category.getProperty("Id").toString()}'
-                                   WITH c,cd, '$productContent' as productDescription
-                                   WHERE productDescription CONTAINS toString(' ' + cd.Title +' ')
-                                   RETURN c as fact, collect(cd) as factDetect""".trimMargin()
-//                                   UNION
-//                                   MATCH (s:SiteConfiguration)-[:${Relations.RP_CATEGORY_IN_SITE.toString()}]-(rp:RPCategory)-[:${Relations.FACT_HAS_CATEGORY.toString()}]-(c:Fact)-[:${Relations.AND_FACTDETECT_IN_FACT}]-(cd:FactDetect)
-//                                   WHERE s.SiteId = 'a462b94d-687f-486b-9595-065922b09d8b'
-//                                   AND rp.Id = '${category.getProperty("Id").toString()}'
-//                                   WITH c,cd, '$productContent' as productDescription,collect(cd.Title) as detectTitle, collect(cd.Id) as detectId
-//                                   WHERE all (x IN detectTitle WHERE productDescription CONTAINS toString(' ' + x +' '))
-//                                   WITH c,cd, detectTitle, detectId
-//                                   MATCH (s:SiteConfiguration)-[:${Relations.FACTDETECT_IN_SITE.toString()}]-(cd2:FactDetect)
-//                                   WHERE cd2.Id in detectId
-//                                   RETURN c as fact, collect(cd2) as factDetect
-
-                val brandDetectCountList = mutableListOf<DetectCountViewModel>()
-
-                val oldRelFact: Iterable<Relationship> = product.getRelationships(RelationshipType { Relations.FACT_HAS_PRODUCT.toString() }, Direction.OUTGOING)
-                oldRelFact.forEach {
-                    it.delete()
-                }
-
-                val oldRelFactDetect: Iterable<Relationship> = product.getRelationships(RelationshipType { Relations.FACTDETECT_HAS_PRODUCT.toString() }, Direction.OUTGOING)
-                oldRelFactDetect.forEach {
-                    it.delete()
-                }
-
-                db.execute(query).use({ result ->
-                    while (result.hasNext()) {
-                        val row = result.next()
-
-                        val brand: Node = row.get("fact") as Node
-                        @Suppress("UNCHECKED_CAST")
-                        val brandDetect: Iterable<Node> = row.get("factDetect") as Iterable<Node>
-                        var count: Int = 0
-
-                        brandDetect.forEach {
-                            val wordCount: Int = wordCount(productContent, it.getProperty("Title").toString())
-
-                            val productToBrandDetectRel: Relationship = product.createRelationshipTo(it, RelationshipType { Relations.FACTDETECT_HAS_PRODUCT.toString() })
-                            productToBrandDetectRel.setProperty("DetectCount", wordCount)
-
-                            log.info("word")
-
-                            count += wordCount
-                        }
-
-                        val rel: Relationship = product.createRelationshipTo(brand, RelationshipType { Relations.FACT_HAS_PRODUCT.toString() })
-                        rel.setProperty("DetectCount", count)
-
-                        val detectInstanse = DetectCountViewModel(count, brand)
-                        brandDetectCountList.add(detectInstanse)
-                    }
-                    result.close()
-                })
-
-                return true
-            } else
-                return false
-        } catch (e: Exception) {
-            log.info("Error: ${e.message.toString()}")
-            return false
-        }
-    }
 
     private fun analyseProduct(product: Node): Boolean {
 
@@ -692,40 +446,7 @@ class ProcessData {
         }
     }
 
-    fun wordCount(s: String, pattern: String): Int {
 
-        var sTemp = s
-        var counter = 0
-
-        while (sTemp.length > 0) {
-            val index = sTemp.indexOf(pattern)
-            if (index == -1) break
-            sTemp = sTemp.substring(index + pattern.length, sTemp.length)
-            counter++
-        }
-        return counter
-    }
-
-    fun deleteProductRelation(product: Node) {
-
-
-        var queryDelete = """MATCH (p:Product {HashTitle:"${product.getProperty("HashTitle")}"})-[r1:RP_CATEGORY_HAS_PRODUCT|:PRODUCT_HAS_BRAND|:PRODUCT_HAS_FACT|:BRANDDETECT_HAS_PRODUCT|:CATEGORYDETECT_HAS_PRODUCT|:FACTDETECT_HAS_PRODUCT|:PRODUCT_HAS_MAIN_RPCATEGORY|:PRODUCT_HAS_MAIN_BRAND]-(d)
-                             DELETE r1""".trimMargin()
-
-        db.execute(queryDelete)
-    }
-
-}
-
-class DetectCountViewModel(Count: Int, Detect: Node) {
-
-    var detect: Node = Detect
-    var count: Int = Count
-}
-
-class DetectCount {
-    lateinit var detect: Node
-    var count: Int = 0
 }
 
 class EngineLable {
