@@ -1,5 +1,6 @@
 package dor.neo4j
 
+import jdk.nashorn.internal.parser.JSONParser
 import org.bouncycastle.asn1.DEREncodableVector
 import org.neo4j.graphdb.GraphDatabaseService
 import org.neo4j.graphdb.Label
@@ -108,15 +109,15 @@ class ProcessData {
     @Context
     lateinit var log: Log
 
-    @UserFunction(name="dor.uuid")
+    @UserFunction(name = "dor.uuid")
     @Description("creates an UUID (universally unique id)")
     fun CreateUUID(): String {
         return UUID.randomUUID().toString()
     }
 
-    @UserFunction(name="dor.sha256")
+    @UserFunction(name = "dor.sha256")
     @Description("Convert data from string to Sha256 String in a function")
-    fun Sha256Maker(@Name("data")data: String): String{
+    fun Sha256Maker(@Name("data") data: String): String {
         // Note : Neo4j UserFunction only accepts a limited range of types.
         val h = Sha256Hash()
         return h.hash(data)
@@ -124,25 +125,23 @@ class ProcessData {
 
 
     @UserFunction(name = "dor.counter")
-    fun counter(@Name("Detect") pattern: String,@Name("Description") text: String): Number {
+    fun counter(@Name("Detect") pattern: String, @Name("Description") text: String): Number {
         var sTemp = text.toLowerCase()
         var counter = 0
+        val sPattern = " "+ pattern + " "
 
         while (sTemp.length > 0) {
-            val index = sTemp.indexOf(pattern)
+            val index = sTemp.indexOf(sPattern)
             if (index == -1) break
-            sTemp = sTemp.substring(index + pattern.length, sTemp.length)
+            sTemp = sTemp.substring(index + sPattern.length, sTemp.length)
             counter++
         }
         return counter
     }
 
-    @Procedure(name = "dor.createProduct")
-    fun createProduct(@Name("Product") product : Any) {
-
-        product as Product
-
-        val newquery="""
+    @Procedure(name = "dor.createProduct", mode = Mode.WRITE)
+    fun createProduct(@Name("FaTitle") FaTitle: String, @Name("EnTitle") EnTitle: String, @Name("Description") Description: String, @Name("Price") Price: Long, @Name("SourceURL") SourceUrl: String, @Name("ImagePath") ImagePath: String) {
+        val newquery = """
         WITH split("My phone frequently calls drop frequently with the iPhone"," ") as words
         UNWIND range(0,size(words)-2) as i
         merge(w3:Word {name:words[i],hash:dor.sha256(words[i]+i)})
@@ -150,20 +149,70 @@ class ProcessData {
         create (w3)-[:NEXT]->(w4)
          """
 
-        val q = """CREATE (c:Product { product })
+        val hashFaTitle = Sha256Maker(FaTitle)
+        val product: Node? = db.findNode(EngineLable.productLabel(), "HashTitle", hashFaTitle)
+
+        if (product == null){
+            val id = CreateUUID()
+            val q = """CREATE (c:Product { FaTitle:"$FaTitle", EnTitle:"$EnTitle", Description:"$Description", Price:"$Price", SourceUrl:"$SourceUrl", ImagePath:"$ImagePath", HashTitle:"$hashFaTitle",Id:"$id" })
                    WITH c
                    MATCH (rs:RS)
                    WHERE rs.SiteId = "50cfc9e8-402b-495b-8ed4-66dcb2b3aadd"
-                   CREATE Unique (rs)<-[:${Relations.PRODUCT_IN_RS.toString()}]-(c)
-                   WITH c
-                   WITH SPLIT(c.Description," ") as words, c
-                   UNWIND range(0,size(words)-2) as idx
-                   MERGE (w1:Word {Title:words[idx],HashTitle: adt.covertToSHA256(words[idx]), Id:adt.generateUUID()})
-                   MERGE (w2:Word {Title:words[idx+1]})
-                   MERGE (w1)-[:NEXT]->(w2)
+                   CREATE UNIQUE (rs)<-[:${Relations.PRODUCT_IN_RS.toString()}]-(c)""".trimMargin()
+
+            val descQuery = """
+                //Description Chain
+                   MATCH (c:Product)
+                   WHERE c.Id = "$id"
+                   WITH reduce(t=trim(toLower(c.Description)), delim in ["’", "'", "[", "]", "(", ")", "{", "}", "⟨", "⟩", ":", ",", "،", "、", "‒", "–", "—", "…", "...", "⋯", "᠁", "ฯ", "!", ".", "‹", "›", "«", "»", "‐", "-", "?", "‘", "’", "“", "”", "'", "'", '"', ";", "/", "·", "&", "*", "@", "\\", "•", " ^ ", "°", "”", "#", "÷", "×", "º", "ª", "%", "‰", "+", "−", "=", "‱", "¶", "′", "″", "‴", "§", "~", "_", "|", "‖", "¦", "©", "℗", "®", "℠", "،", "؟", "»", "«", "-", "؛", "..."] | replace(t,delim,"")) as normalized, c
+                   WITH split(normalized," ") as words, c
+                   UNWIND range(0,size(words)-2) as i
+                   MERGE (w3:Word {Title:words[i],Hash:dor.sha256(words[i]+i+c.Id)})
+                   MERGE (w4:Word {Title:words[i+1],Hash:dor.sha256(words[i+1]+(i+1)+c.Id)})
+                   CREATE (w3)-[:NEXT]->(w4)
+                   WITH c, words
+                   MATCH (w:Word {Hash:dor.sha256(words[0]+0+c.Id)})
+                   MERGE (c)-[:PRODUCT_HAS_DESCRIPTION]->(w)""".trimMargin()
+
+            val titleQuery = """
+                   //Persian Title Chain
+                   MATCH (c:Product)
+                   WHERE c.Id = "$id"
+                   WITH reduce(t=trim(toLower(c.FaTitle)), delim in ["’", "'", "[", "]", "(", ")", "{", "}", "⟨", "⟩", ":", ",", "،", "、", "‒", "–", "—", "…", "...", "⋯", "᠁", "ฯ", "!", ".", "‹", "›", "«", "»", "‐", "-", "?", "‘", "’", "“", "”", "'", "'", '"', ";", "/", "·", "&", "*", "@", "\\", "•", " ^ ", "°", "”", "#", "÷", "×", "º", "ª", "%", "‰", "+", "−", "=", "‱", "¶", "′", "″", "‴", "§", "~", "_", "|", "‖", "¦", "©", "℗", "®", "℠", "،", "؟", "»", "«", "-", "؛", "..."] | replace(t,delim,"")) as normalized, c
+                   WITH split(normalized," ") as words, c
+                   UNWIND range(0,size(words)-2) as i
+                   MERGE(w3:Word {Title:words[i],Hash:dor.sha256(words[i]+i+c.Id)})
+                   MERGE(w4:Word {Title:words[i+1],Hash:dor.sha256(words[i+1]+(i+1)+c.Id)})
+                   CREATE (w3)-[:NEXT]->(w4)
+                   WITH c, words
+                   MATCH (w:Word {Hash:dor.sha256(words[0]+0+c.Id)})
+                   MERGE (c)-[:PRODUCT_HAS_PERSIANTITLE]->(w)""".trimMargin()
+
+            val enTitleQuery = """
+                   //English Title Chain
+                   MATCH (c:Product)
+                   WHERE c.Id = "$id"
+                   WITH reduce(t=trim(toLower(c.EnTitle)), delim in ["’", "'", "[", "]", "(", ")", "{", "}", "⟨", "⟩", ":", ",", "،", "、", "‒", "–", "—", "…", "...", "⋯", "᠁", "ฯ", "!", ".", "‹", "›", "«", "»", "‐", "-", "?", "‘", "’", "“", "”", "'", "'", '"', ";", "/", "·", "&", "*", "@", "\\", "•", " ^ ", "°", "”", "#", "÷", "×", "º", "ª", "%", "‰", "+", "−", "=", "‱", "¶", "′", "″", "‴", "§", "~", "_", "|", "‖", "¦", "©", "℗", "®", "℠", "،", "؟", "»", "«", "-", "؛", "..."] | replace(t,delim,"")) as normalized, c
+                   WITH split(normalized," ") as words, c
+                   UNWIND range(0,size(words)-2) as i
+                   MERGE(w3:Word {Title:words[i],Hash:dor.sha256(words[i]+i+c.Id)})
+                   MERGE(w4:Word {Title:words[i+1],Hash:dor.sha256(words[i+1]+(i+1)+c.Id)})
+                   CREATE (w3)-[:NEXT]->(w4)
+                   WITH c, words
+                   MATCH (w:Word {Hash:dor.sha256(words[0]+0+c.Id)})
+                   MERGE (c)-[:PRODUCT_HAS_ENGLISHTITLE]->(w)
                    """.trimMargin()
 
-        db.execute(q)
+            db.execute(q)
+            db.execute(descQuery)
+            db.execute(titleQuery)
+            db.execute(enTitleQuery)
+
+
+            val product: Node = db.findNode(EngineLable.productLabel(), "Id", id)
+            analyseProduct(product)
+        }
+
     }
 
     @Procedure(name = "dor.defineProduct", mode = Mode.WRITE)
@@ -174,7 +223,7 @@ class ProcessData {
     }
 
     @Procedure(name = "dor.defineAllProducts", mode = Mode.WRITE)
-    fun defineAllProducts(){
+    fun defineAllProducts() {
         try {
 
             val startTime = System.currentTimeMillis()
@@ -454,8 +503,11 @@ class ProcessData {
                            WITH split(cd.Title," ") as d, c, cd, collect(w.Title) as word, p
                            WHERE ALL(x in d WHERE x in word)
                           // WITH count(w) as wordCount,c as cat,collect(DISTINCT cd.Id) as detect, p
-                          WITH adt.counter(cd.Title,toString(p.Description + " " + p.FaTitle + " " + p.EnTitle)) as dd, cd, c, p
-                          WITH sum(dd) as wordCount, collect(cd.Id) as detect, c as cat, p
+                           WITH reduce(t=trim(toLower(p.Description)), delim in ["’", "'", "[", "]", "(", ")", "{", "}", "⟨", "⟩", ":", ",", "،", "、", "‒", "–", "—", "…", "...", "⋯", "᠁", "ฯ", "!", ".", "‹", "›", "«", "»", "‐", "-", "?", "‘", "’", "“", "”", "'", "'", '"', ";", "/", "·", "&", "*", "@", "\\", "•", " ^ ", "°", "”", "#", "÷", "×", "º", "ª", "%", "‰", "+", "−", "=", "‱", "¶", "′", "″", "‴", "§", "~", "_", "|", "‖", "¦", "©", "℗", "®", "℠", "،", "؟", "»", "«", "-", "؛", "..."] | replace(t,delim,"")) as normalizedDesc, cd, c, p
+                           WITH reduce(t=trim(toLower(p.FaTitle)), delim in ["’", "'", "[", "]", "(", ")", "{", "}", "⟨", "⟩", ":", ",", "،", "、", "‒", "–", "—", "…", "...", "⋯", "᠁", "ฯ", "!", ".", "‹", "›", "«", "»", "‐", "-", "?", "‘", "’", "“", "”", "'", "'", '"', ";", "/", "·", "&", "*", "@", "\\", "•", " ^ ", "°", "”", "#", "÷", "×", "º", "ª", "%", "‰", "+", "−", "=", "‱", "¶", "′", "″", "‴", "§", "~", "_", "|", "‖", "¦", "©", "℗", "®", "℠", "،", "؟", "»", "«", "-", "؛", "..."] | replace(t,delim,"")) as normalizedFaTitle, cd, c, p, normalizedDesc
+                           WITH reduce(t=trim(toLower(p.EnTitle)), delim in ["’", "'", "[", "]", "(", ")", "{", "}", "⟨", "⟩", ":", ",", "،", "、", "‒", "–", "—", "…", "...", "⋯", "᠁", "ฯ", "!", ".", "‹", "›", "«", "»", "‐", "-", "?", "‘", "’", "“", "”", "'", "'", '"', ";", "/", "·", "&", "*", "@", "\\", "•", " ^ ", "°", "”", "#", "÷", "×", "º", "ª", "%", "‰", "+", "−", "=", "‱", "¶", "′", "″", "‴", "§", "~", "_", "|", "‖", "¦", "©", "℗", "®", "℠", "،", "؟", "»", "«", "-", "؛", "..."] | replace(t,delim,"")) as normalizedEnTitle, cd, c, p, normalizedDesc, normalizedFaTitle
+                           WITH dor.counter(cd.Title,toString(normalizedDesc + " " + normalizedFaTitle + " " + normalizedEnTitle)) as dd, cd, c, p
+                           WITH sum(dd) as wordCount, collect(cd.Id) as detect, c as cat, p
                            MATCH (cd2:CategoryDetect)
                            WHERE cd2.Id in detect
                            WITH cd2, p, cat, wordCount
@@ -483,7 +535,10 @@ class ProcessData {
                            MATCH (rp2)-[:SPEC_HAS_CATEGORY]-(:Spec)-[:FACTDETECT_IN_SPEC]-(cd2:FactDetect)-[:FACTDETECT_HAS_FACT]-(c2:Fact)
                            WITH split(cd2.Title," ") as d3, c2, cd2, collect(w2.Title) as word, p
                            WHERE ALL(x in d3 WHERE x in word)
-                           WITH adt.counter(cd2.Title,toString(p.Description + " " + p.FaTitle + " " + p.EnTitle)) as dd, cd2, c2, p
+                           WITH reduce(t=trim(toLower(p.Description)), delim in ["’", "'", "[", "]", "(", ")", "{", "}", "⟨", "⟩", ":", ",", "،", "、", "‒", "–", "—", "…", "...", "⋯", "᠁", "ฯ", "!", ".", "‹", "›", "«", "»", "‐", "-", "?", "‘", "’", "“", "”", "'", "'", '"', ";", "/", "·", "&", "*", "@", "\\", "•", " ^ ", "°", "”", "#", "÷", "×", "º", "ª", "%", "‰", "+", "−", "=", "‱", "¶", "′", "″", "‴", "§", "~", "_", "|", "‖", "¦", "©", "℗", "®", "℠", "،", "؟", "»", "«", "-", "؛", "..."] | replace(t,delim,"")) as normalizedDesc, cd2, c2, p
+                           WITH reduce(t=trim(toLower(p.FaTitle)), delim in ["’", "'", "[", "]", "(", ")", "{", "}", "⟨", "⟩", ":", ",", "،", "、", "‒", "–", "—", "…", "...", "⋯", "᠁", "ฯ", "!", ".", "‹", "›", "«", "»", "‐", "-", "?", "‘", "’", "“", "”", "'", "'", '"', ";", "/", "·", "&", "*", "@", "\\", "•", " ^ ", "°", "”", "#", "÷", "×", "º", "ª", "%", "‰", "+", "−", "=", "‱", "¶", "′", "″", "‴", "§", "~", "_", "|", "‖", "¦", "©", "℗", "®", "℠", "،", "؟", "»", "«", "-", "؛", "..."] | replace(t,delim,"")) as normalizedFaTitle, cd2, c2, p, normalizedDesc
+                           WITH reduce(t=trim(toLower(p.EnTitle)), delim in ["’", "'", "[", "]", "(", ")", "{", "}", "⟨", "⟩", ":", ",", "،", "、", "‒", "–", "—", "…", "...", "⋯", "᠁", "ฯ", "!", ".", "‹", "›", "«", "»", "‐", "-", "?", "‘", "’", "“", "”", "'", "'", '"', ";", "/", "·", "&", "*", "@", "\\", "•", " ^ ", "°", "”", "#", "÷", "×", "º", "ª", "%", "‰", "+", "−", "=", "‱", "¶", "′", "″", "‴", "§", "~", "_", "|", "‖", "¦", "©", "℗", "®", "℠", "،", "؟", "»", "«", "-", "؛", "..."] | replace(t,delim,"")) as normalizedEnTitle, cd2, c2, p, normalizedDesc, normalizedFaTitle
+                           WITH dor.counter(cd2.Title,toString(normalizedDesc + " " + normalizedFaTitle + " " + normalizedEnTitle)) as dd, cd2, c2, p
                            WITH sum(dd) as wordCount2, collect(cd2.Id) as detect2, c2 as cat2, p
                            //WITH split(cd2.Title," ") as d2, c2, cd2, p, w2
                            //WHERE all(x in d2 WHERE x in w2.Title)
@@ -507,7 +562,10 @@ class ProcessData {
                            WHERE s3.SiteId = 'a462b94d-687f-486b-9595-065922b09d8b'
                            WITH split(cd3.Title," ") as d3, c3, cd3, collect(w3.Title) as word, p
                            WHERE ALL(x in d3 WHERE x in word)
-                           WITH adt.counter(cd3.Title,toString(p.Description + " " + p.FaTitle + " " + p.EnTitle)) as dd, cd3, c3, p
+                           WITH reduce(t=trim(toLower(p.Description)), delim in ["’", "'", "[", "]", "(", ")", "{", "}", "⟨", "⟩", ":", ",", "،", "、", "‒", "–", "—", "…", "...", "⋯", "᠁", "ฯ", "!", ".", "‹", "›", "«", "»", "‐", "-", "?", "‘", "’", "“", "”", "'", "'", '"', ";", "/", "·", "&", "*", "@", "\\", "•", " ^ ", "°", "”", "#", "÷", "×", "º", "ª", "%", "‰", "+", "−", "=", "‱", "¶", "′", "″", "‴", "§", "~", "_", "|", "‖", "¦", "©", "℗", "®", "℠", "،", "؟", "»", "«", "-", "؛", "..."] | replace(t,delim,"")) as normalizedDesc, cd3, c3, p
+                           WITH reduce(t=trim(toLower(p.FaTitle)), delim in ["’", "'", "[", "]", "(", ")", "{", "}", "⟨", "⟩", ":", ",", "،", "、", "‒", "–", "—", "…", "...", "⋯", "᠁", "ฯ", "!", ".", "‹", "›", "«", "»", "‐", "-", "?", "‘", "’", "“", "”", "'", "'", '"', ";", "/", "·", "&", "*", "@", "\\", "•", " ^ ", "°", "”", "#", "÷", "×", "º", "ª", "%", "‰", "+", "−", "=", "‱", "¶", "′", "″", "‴", "§", "~", "_", "|", "‖", "¦", "©", "℗", "®", "℠", "،", "؟", "»", "«", "-", "؛", "..."] | replace(t,delim,"")) as normalizedFaTitle, cd3, c3, p, normalizedDesc
+                           WITH reduce(t=trim(toLower(p.EnTitle)), delim in ["’", "'", "[", "]", "(", ")", "{", "}", "⟨", "⟩", ":", ",", "،", "、", "‒", "–", "—", "…", "...", "⋯", "᠁", "ฯ", "!", ".", "‹", "›", "«", "»", "‐", "-", "?", "‘", "’", "“", "”", "'", "'", '"', ";", "/", "·", "&", "*", "@", "\\", "•", " ^ ", "°", "”", "#", "÷", "×", "º", "ª", "%", "‰", "+", "−", "=", "‱", "¶", "′", "″", "‴", "§", "~", "_", "|", "‖", "¦", "©", "℗", "®", "℠", "،", "؟", "»", "«", "-", "؛", "..."] | replace(t,delim,"")) as normalizedEnTitle, cd3, c3, p, normalizedDesc, normalizedFaTitle
+                           WITH dor.counter(cd3.Title,toString(normalizedDesc + " " + normalizedFaTitle + " " + normalizedEnTitle)) as dd, cd3, c3, p
                            WITH sum(dd) as wordCount3, collect(cd3.Id) as detect3, c3 as cat3, p
                            //WITH split(cd3.Title," ") as d3, c3, cd3, w3, p
                            //WHERE all(x in d3 WHERE x in w3.Title)
@@ -552,7 +610,7 @@ class ProcessData {
                            WITH split(cd.Title," ") as d, c, cd, collect(w.Title) as word, p
                            WHERE ALL(x in d WHERE x in word)
                           // WITH count(w) as wordCount,c as cat,collect(DISTINCT cd.Id) as detect, p
-                          WITH adt.counter(cd.Title,toString(p.Description + " " + p.FaTitle + " " + p.EnTitle)) as dd, cd, c, p
+                          WITH dor.counter(cd.Title,toString(p.Description + " " + p.FaTitle + " " + p.EnTitle)) as dd, cd, c, p
                           WITH sum(dd) as wordCount, collect(cd.Id) as detect, c as cat, p
                            MATCH (cd2:CategoryDetect)
                            WHERE cd2.Id in detect
@@ -578,7 +636,7 @@ class ProcessData {
                            MATCH (p)-[:PRODUCT_HAS_MAIN_RPCATEGORY]-(rp:RPCategory)-[:FACT_HAS_CATEGORY]-(c2:Fact)-[:FACTDETECT_IN_FACT]-(cd2:FactDetect)
                            WITH split(cd2.Title," ") as d3, c2, cd2, collect(w2.Title) as word, p
                            WHERE ALL(x in d3 WHERE x in word)
-                           WITH adt.counter(cd2.Title,toString(p.Description + " " + p.FaTitle + " " + p.EnTitle)) as dd, cd2, c2, p
+                           WITH dor.counter(cd2.Title,toString(p.Description + " " + p.FaTitle + " " + p.EnTitle)) as dd, cd2, c2, p
                            WITH sum(dd) as wordCount2, collect(cd2.Id) as detect2, c2 as cat2, p
                            //WITH split(cd2.Title," ") as d2, c2, cd2, p, w2
                            //WHERE all(x in d2 WHERE x in w2.Title)
@@ -602,7 +660,7 @@ class ProcessData {
                            WHERE s3.SiteId = 'a462b94d-687f-486b-9595-065922b09d8b'
                            WITH split(cd3.Title," ") as d3, c3, cd3, collect(w3.Title) as word, p
                            WHERE ALL(x in d3 WHERE x in word)
-                           WITH adt.counter(cd3.Title,toString(p.Description + " " + p.FaTitle + " " + p.EnTitle)) as dd, cd3, c3, p
+                           WITH dor.counter(cd3.Title,toString(p.Description + " " + p.FaTitle + " " + p.EnTitle)) as dd, cd3, c3, p
                            WITH sum(dd) as wordCount3, collect(cd3.Id) as detect3, c3 as cat3, p
                            //WITH split(cd3.Title," ") as d3, c3, cd3, w3, p
                            //WHERE all(x in d3 WHERE x in w3.Title)
