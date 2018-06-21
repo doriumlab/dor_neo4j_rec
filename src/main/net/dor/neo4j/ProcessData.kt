@@ -318,7 +318,7 @@ class ProcessData {
                        WITH wordCount, cat, product, detect ORDER BY wordCount DESC limit 1
                        MATCH (spd2:SpecDetect)-[:SPECDETECT_IN_SPEC]-(:Spec)-[:SPEC_HAS_CATEGORY]-(cat)
                        WHERE spd2.Id in detect
-                       MERGE (spd2)-[:PRODUCT_HAS_SPECDETECT]-(product)
+                       MERGE (spd2)<-[:SPECDETECT_HAS_PRODUCT]-(product)
                        MERGE (cat)-[:PRODUCT_HAS_MAIN_RPCATEGORY {DetectCount:wordCount}]-(product)""".trimMargin()
 
             var queryFact = """
@@ -452,21 +452,18 @@ class ProcessData {
                        OPTIONAL MATCH (product)<-[r3:PRODUCT_HAS_MAIN_RPCATEGORY]-(:RPCategory)
                        DELETE r3
                        WITH cd2, product, spec,spd , cat, wordCount
-                       OPTIONAL MATCH (product)<-[r4:PRODUCT_HAS_SPEC]-(:Spec)
-                       DELETE r4
-                       WITH cd2, product, spec,spd , cat, wordCount
                        OPTIONAL MATCH (product)<-[r5:PRODUCT_HAS_SPECDETECT]-(:SpecDetect)
                        DELETE r5
                        //----------------------
                        WITH cd2, product, spec,spd , cat, wordCount
                        MERGE (product)-[:CATEGORYDETECT_HAS_PRODUCT]-(cd2)
                        MERGE (product)-[:RP_CATEGORY_HAS_PRODUCT {DetectCount:wordCount}]-(cat)
-                       WITH spec,spd,wordCount, cat, product  order by wordCount DESC limit 1
-                       MERGE (cat)-[:PRODUCT_HAS_MAIN_RPCATEGORY {DetectCount:wordCount}]-(product)
-                       with cat , spec,spd,product
-                       where (spec)-[:SPEC_HAS_CATEGORY]-(cat)
-                       MERGE (spec)-[:PRODUCT_HAS_SPEC]-(product)
-                       MERGE (spd)-[:PRODUCT_HAS_SPECDETECT]-(product)""".trimMargin()
+                       WITH collect(DISTINCT spd.Id) as detect, wordCount, cat, product
+                       WITH wordCount, cat, product, detect ORDER BY wordCount DESC limit 1
+                       MATCH (spd2:SpecDetect)-[:SPECDETECT_IN_SPEC]-(:Spec)-[:SPEC_HAS_CATEGORY]-(cat)
+                       WHERE spd2.Id in detect
+                       MERGE (spd2)<-[:SPECDETECT_HAS_PRODUCT]-(product)
+                       MERGE (cat)-[:PRODUCT_HAS_MAIN_RPCATEGORY {DetectCount:wordCount}]-(product)""".trimMargin()
 
             var queryFact = """
                            MATCH (p:Product)-[:PRODUCT_HAS_DESCRIPTION|:PRODUCT_HAS_PERSIANTITLE|:PRODUCT_HAS_ENGLISHTITLE]-(:Word)-[:NEXT*0..]-(w2:Word)
