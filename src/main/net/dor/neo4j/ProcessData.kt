@@ -102,7 +102,7 @@ class ProcessData {
         PRODUCT_HAS_MAIN_RPCATEGORY
     }
 
-    val RSId = "50cfc9e8-402b-495b-8ed4-66dcb2b3aadd"
+
 
 
     @Context
@@ -160,7 +160,7 @@ class ProcessData {
             val q = """CREATE (c:Product { FaTitle:"$FaTitle", EnTitle:"$EnTitle", Description:"$Description", Price:"$Price", SourceUrl:"$SourceUrl", ImagePath:"$ImagePath", HashTitle:"$hashFaTitle",Id:"$id" })
                    WITH c
                    MATCH (rs:RS)
-                   WHERE rs.SiteId = "$RSId"
+                   WHERE rs.SiteId = "50cfc9e8-402b-495b-8ed4-66dcb2b3aadd"
                    CREATE UNIQUE (rs)<-[:${Relations.PRODUCT_IN_RS.toString()}]-(c)""".trimMargin()
 
             val descQuery = """
