@@ -215,6 +215,8 @@ class ProcessData {
 
             val product: Node = db.findNode(EngineLable.productLabel(), "Id", id)
             analyseProduct(product)
+        }else{
+            analyseProduct(product)
         }
 
     }
@@ -249,47 +251,51 @@ class ProcessData {
 
         try {
 
+            var queryDelete = """
+                MATCH (product:Product {HashTitle:'${product.getProperty("HashTitle")}'})
+                OPTIONAL MATCH (product)-[r:CATEGORYDETECT_HAS_PRODUCT]-(:CategoryDetect)
+                OPTIONAL MATCH (product)-[r2:RP_CATEGORY_HAS_PRODUCT]-(:RPCategory)
+                OPTIONAL MATCH (product)<-[r3:PRODUCT_HAS_MAIN_RPCATEGORY]-(:RPCategory)
+                OPTIONAL MATCH (product)-[r4:SPECDETECT_HAS_PRODUCT]-(:SpecDetect)
+                OPTIONAL MATCH (product)-[r5:FACTDETECT_HAS_PRODUCT]-(:FactDetect)
+                OPTIONAL MATCH (product)-[r6:FACT_HAS_PRODUCT]-(:Fact)
+                OPTIONAL MATCH (product)-[r7:BRANDDETECT_HAS_PRODUCT]-(:BrandDetect)
+                OPTIONAL MATCH (product)-[r8:PRODUCT_HAS_BRAND]-(:Brand)
+                OPTIONAL MATCH (product)<-[r9:PRODUCT_HAS_MAIN_BRAND]-(:Brand)
+                DELETE r,r2,r3,r4,r5,r6,r7,r8,r9
+                """.trimMargin()
+
             var query = """
                        MATCH (product:Product {HashTitle:'${product.getProperty("HashTitle")}'})-[:PRODUCT_HAS_DESCRIPTION|:PRODUCT_HAS_PERSIANTITLE|:PRODUCT_HAS_ENGLISHTITLE]-(:Word)-[:NEXT*0..]-(w:Word)
                        WITH w, product
                        //----------------------------
-                       MATCH (s:SiteConfiguration)-[:RP_CATEGORY_IN_SITE]-(rp:RPCategory)-[:SPEC_HAS_CATEGORY]-(spec:Spec)-[:SPECDETECT_IN_SPEC]-(spd:SpecDetect)
+                       MATCH (s:SiteConfiguration)-[:SPECDETECT_IN_SITE]-(spd:SpecDetect)-[:SPECDETECT_IN_SPEC]-(spec:Spec)-[:SPEC_HAS_CATEGORY]-(rp:RPCategory)
                        WHERE s.SiteId = 'a462b94d-687f-486b-9595-065922b09d8b'
-                       WITH split(spd.Title," ") as splitSpd, spec, spd, rp, collect(w.Title) as word, product
-                       WHERE ALL(x in splitSpd WHERE x in word)
-                       With rp, spec, spd, word, product
+                       WITH split(spd.Title," ") as splitSpd, spd, rp, collect(w.Title) as word, product
+                       WHERE ALL(x in splitSpd WHERE x IN word)
+                       WITH rp, collect(spd.Id) as detect3, product
                        //-----------------------------
-                       Match (rp)-[:RPC_IS_RPC_CHILD*0..]-(rp2:RPCategory)-[:CATEGORYDETECT_IN_RPCATEGORY]-(cd:CategoryDetect)
-                       WITH split(cd.Title," ") as splitCd, cd, rp2, spec, spd, word, product
+                       MATCH (product)-[:PRODUCT_HAS_DESCRIPTION|:PRODUCT_HAS_PERSIANTITLE|:PRODUCT_HAS_ENGLISHTITLE]-(:Word)-[:NEXT*0..]-(w:Word)
+                       WITH rp, detect3, product, w
+                       //-----------------------------
+                       MATCH (rp)-[:RPC_IS_RPC_CHILD*0..]->(rp2:RPCategory)-[:CATEGORYDETECT_IN_RPCATEGORY]-(cd:CategoryDetect)
+                       WITH split(cd.Title," ") as splitCd, cd, rp2, detect3, collect(w.Title) as word, product
                        WHERE ALL (x in splitCd WHERE x in word)
-                       WITH dor.counter(cd.Title,toString(product.Description + " " + product.FaTitle + " " + product.EnTitle)) as dd, cd, rp2 ,spec, product, spd , word
+                       WITH dor.counter(cd.Title,toString(product.Description + " " + product.FaTitle + " " + product.EnTitle)) as dd, cd, rp2 , product, detect3 , word
                        //-----------------------------
-                       WITH sum(dd) as wordCount, collect(cd.Id) as detect, rp2 as cat, product, spec,spd
+                       WITH sum(dd) as wordCount, collect(cd.Id) as detect, rp2 as cat, product, detect3
                        MATCH (cd2:CategoryDetect)
                        WHERE cd2.Id in detect
-                       WITH cd2, product, cat, wordCount, spec,spd
-                       //----------------------------
-                       OPTIONAL MATCH (product)-[r:CATEGORYDETECT_HAS_PRODUCT]-(:CategoryDetect)
-                       DELETE r
-                       WITH cd2, product, spec,spd , cat, wordCount
-                       OPTIONAL MATCH (product)-[r2:RP_CATEGORY_HAS_PRODUCT]-(:RPCategory)
-                       DELETE r2
-                       WITH cd2, product, spec,spd , cat, wordCount
-                       OPTIONAL MATCH (product)<-[r3:PRODUCT_HAS_MAIN_RPCATEGORY]-(:RPCategory)
-                       DELETE r3
-                       WITH cd2, product, spec,spd , cat, wordCount
-                       OPTIONAL MATCH (product)<-[r5:PRODUCT_HAS_SPECDETECT]-(:SpecDetect)
-                       DELETE r5
                        //----------------------
-                       WITH cd2, product, spec,spd , cat, wordCount
+                       WITH cd2, product, detect3 , cat, wordCount
                        MERGE (product)-[:CATEGORYDETECT_HAS_PRODUCT]-(cd2)
                        MERGE (product)-[:RP_CATEGORY_HAS_PRODUCT {DetectCount:wordCount}]-(cat)
-                       WITH collect(DISTINCT spd.Id) as detect, wordCount, cat, product
-                       WITH wordCount, cat, product, detect ORDER BY wordCount DESC limit 1
-                       MATCH (spd2:SpecDetect)-[:SPECDETECT_IN_SPEC]-(:Spec)-[:SPEC_HAS_CATEGORY]-(cat)
-                       WHERE spd2.Id in detect
-                       MERGE (spd2)<-[:SPECDETECT_HAS_PRODUCT]-(product)
-                       MERGE (cat)-[:PRODUCT_HAS_MAIN_RPCATEGORY {DetectCount:wordCount}]-(product)""".trimMargin()
+                       WITH wordCount, cat, product, detect3 ORDER BY wordCount DESC limit 1
+                       MERGE (cat)-[:PRODUCT_HAS_MAIN_RPCATEGORY {DetectCount:wordCount}]-(product)
+                       WITH detect3,product,cat
+                       MATCH (cd3:SpecDetect)-[:SPECDETECT_IN_SPEC]-(:Spec)-[:SPEC_HAS_CATEGORY]-(cat)
+                       WHERE cd3.Id IN detect3
+                       MERGE (product)-[r5:SPECDETECT_HAS_PRODUCT]->(cd3)""".trimMargin()
 
             var queryFact = """
                            MATCH (p:Product {HashTitle:'${product.getProperty("HashTitle")}'})-[:PRODUCT_HAS_DESCRIPTION|:PRODUCT_HAS_PERSIANTITLE|:PRODUCT_HAS_ENGLISHTITLE]-(:Word)-[:NEXT*0..]-(w3:Word)
@@ -305,12 +311,6 @@ class ProcessData {
                            WITH sum(dd) as wordCount3, collect(cd3.Id) as detect3, c3 as cat3, p
                            MATCH (cd4:FactDetect)
                            WHERE cd4.Id in detect3
-                           WITH cd4, p, cat3, wordCount3
-                           OPTIONAL MATCH (p)-[r:FACTDETECT_HAS_PRODUCT]-(:FactDetect)
-                           DELETE r
-                           WITH cd4, p, cat3, wordCount3
-                           OPTIONAL MATCH (p)-[r2:FACT_HAS_PRODUCT]-(:Fact)
-                           DELETE r2
                            WITH cd4, p, cat3, wordCount3
                            MERGE (p)-[:FACTDETECT_HAS_PRODUCT]-(cd4)
                            MERGE (p)-[:FACT_HAS_PRODUCT {DetectCount:wordCount3}]-(cat3)""".trimMargin()
@@ -333,22 +333,13 @@ class ProcessData {
                            MATCH (cd4:BrandDetect)
                            WHERE cd4.Id in detect3
                            WITH cd4, p, cat3, wordCount3
-                           OPTIONAL MATCH (p)-[r:BRANDDETECT_HAS_PRODUCT]-(:BrandDetect)
-                           DELETE r
-                           WITH cd4, p, cat3, wordCount3
-                           OPTIONAL MATCH (p)-[r2:PRODUCT_HAS_BRAND]-(:Brand)
-                           DELETE r2
-                           WITH cd4, p, cat3, wordCount3
-                           OPTIONAL MATCH (p)<-[r3:PRODUCT_HAS_MAIN_BRAND]-(:Brand)
-                           DELETE r3
-                           WITH cd4, p, cat3, wordCount3
                            MERGE (p)-[:BRANDDETECT_HAS_PRODUCT]-(cd4)
                            MERGE (p)-[:PRODUCT_HAS_BRAND {DetectCount:wordCount3}]-(cat3)
                            WITH wordCount3, cat3, p order by wordCount3 DESC limit 1
                            MERGE (cat3)-[:PRODUCT_HAS_MAIN_BRAND {DetectCount:wordCount3}]-(p)""".trimMargin()
 
+            db.execute(queryDelete)
             db.execute(query)
-
             db.execute(queryFact)
             db.execute(queryBrand)
 
