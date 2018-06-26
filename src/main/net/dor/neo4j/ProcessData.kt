@@ -105,7 +105,6 @@ class ProcessData {
     //val RSId = "50cfc9e8-402b-495b-8ed4-66dcb2b3aadd"
 
 
-
     @Context
     lateinit var db: GraphDatabaseService
 
@@ -132,7 +131,7 @@ class ProcessData {
     fun counter(@Name("Detect") pattern: String, @Name("Description") text: String): Number {
         var sTemp = text.toLowerCase()
         var counter = 0
-        val sPattern = " "+ pattern + " "
+        val sPattern = " " + pattern + " "
 
         while (sTemp.length > 0) {
             val index = sTemp.indexOf(sPattern)
@@ -145,24 +144,24 @@ class ProcessData {
 
     @Procedure(name = "dor.createProduct", mode = Mode.WRITE)
     fun createProduct(@Name("FaTitle") FaTitle: String, @Name("EnTitle") EnTitle: String, @Name("Description") Description: String, @Name("Price") Price: Long, @Name("SourceURL") SourceUrl: String, @Name("ImagePath") ImagePath: String) {
-        val newquery = """
-        WITH split("My phone frequently calls drop frequently with the iPhone"," ") as words
-        UNWIND range(0,size(words)-2) as i
-        merge(w3:Word {name:words[i],hash:dor.sha256(words[i]+i)})
-        merge(w4:Word {name:words[i+1],hash:dor.sha256(words[i+1]+(i+1))})
-        create (w3)-[:NEXT]->(w4)
-         """
+//        val newquery = """
+//        WITH split("My phone frequently calls drop frequently with the iPhone"," ") as words
+//        UNWIND range(0,size(words)-2) as i
+//        merge(w3:Word {name:words[i],hash:dor.sha256(words[i]+i)})
+//        merge(w4:Word {name:words[i+1],hash:dor.sha256(words[i+1]+(i+1))})
+//        create (w3)-[:NEXT]->(w4)
+//         """
 
         val hashFaTitle = Sha256Maker(FaTitle)
         val product: Node? = db.findNode(EngineLable.productLabel(), "HashTitle", hashFaTitle)
 
-        if (product == null){
+        if (product == null) {
             val id = CreateUUID()
             val q = """CREATE (c:Product { FaTitle:"$FaTitle", EnTitle:"$EnTitle", Description:"$Description", Price:"$Price", SourceUrl:"$SourceUrl", ImagePath:"$ImagePath", HashTitle:"$hashFaTitle",Id:"$id" })
-                   WITH c
-                   MATCH (rs:RS)
-                   WHERE rs.SiteId = "50cfc9e8-402b-495b-8ed4-66dcb2b3aadd"
-                   CREATE UNIQUE (rs)<-[:${Relations.PRODUCT_IN_RS.toString()}]-(c)""".trimMargin()
+                       WITH c
+                       MATCH (rs:RS)
+                       WHERE rs.SiteId = "50cfc9e8-402b-495b-8ed4-66dcb2b3aadd"
+                       CREATE UNIQUE (rs)<-[:${Relations.PRODUCT_IN_RS.toString()}]-(c)""".trimMargin()
 
             val descQuery = """
                 //Description Chain
@@ -207,15 +206,21 @@ class ProcessData {
                    MERGE (c)-[:PRODUCT_HAS_ENGLISHTITLE]->(w)
                    """.trimMargin()
 
+            val updateCounter = """
+                    MATCH (rs:RS)
+                    WHERE rs.SiteId = "50cfc9e8-402b-495b-8ed4-66dcb2b3aadd"
+                    WITH rs.CountedProduct as count, rs
+                    SET rs.CountedProduct = count + 1""".trimMargin();
+
             db.execute(q)
             db.execute(descQuery)
             db.execute(titleQuery)
             db.execute(enTitleQuery)
-
+            db.execute(updateCounter)
 
             val product: Node = db.findNode(EngineLable.productLabel(), "Id", id)
             analyseProduct(product)
-        }else{
+        } else {
             analyseProduct(product)
         }
 
@@ -223,29 +228,24 @@ class ProcessData {
 
     @Procedure(name = "dor.defineProduct", mode = Mode.WRITE)
     fun defineProduct(@Name("HashTitle") hashTitle: String) {
+
         val product: Node = db.findNode(EngineLable.productLabel(), "HashTitle", hashTitle)
-        var s = analyseProduct(product)
-        log.info("status: " + s.toString())
+        analyseProduct(product)
+
     }
 
     @Procedure(name = "dor.defineAllProducts", mode = Mode.WRITE)
     fun defineAllProducts() {
         try {
 
-            val startTime = System.currentTimeMillis()
-
             analyseAllProduct()
 
-            val endTime = System.currentTimeMillis()
-            val duration = (endTime - startTime)
-            log.info(duration.toString())
         } catch (e: Exception) {
             log.info("${e.message}")
         }
 
 
     }
-
 
     private fun analyseProduct(product: Node): Boolean {
 
@@ -265,83 +265,92 @@ class ProcessData {
                 DELETE r,r2,r3,r4,r5,r6,r7,r8,r9
                 """.trimMargin()
 
-            var query = """
-                       MATCH (product:Product {HashTitle:'${product.getProperty("HashTitle")}'})-[:PRODUCT_HAS_DESCRIPTION|:PRODUCT_HAS_PERSIANTITLE|:PRODUCT_HAS_ENGLISHTITLE]-(:Word)-[:NEXT*0..]-(w:Word)
-                       WITH w, product
-                       //----------------------------
-                       MATCH (s:SiteConfiguration)-[:SPECDETECT_IN_SITE]-(spd:SpecDetect)-[:SPECDETECT_IN_SPEC]-(spec:Spec)-[:SPEC_HAS_CATEGORY]-(rp:RPCategory)
-                       WHERE s.SiteId = 'a462b94d-687f-486b-9595-065922b09d8b'
-                       WITH split(spd.Title," ") as splitSpd, spd, rp, collect(w.Title) as word, product
-                       WHERE ALL(x in splitSpd WHERE x IN word)
-                       WITH rp, collect(spd.Id) as detect3, product
-                       //-----------------------------
-                       MATCH (product)-[:PRODUCT_HAS_DESCRIPTION|:PRODUCT_HAS_PERSIANTITLE|:PRODUCT_HAS_ENGLISHTITLE]-(:Word)-[:NEXT*0..]-(w:Word)
-                       WITH rp, detect3, product, w
-                       //-----------------------------
-                       MATCH (rp)-[:RPC_IS_RPC_CHILD*0..]->(rp2:RPCategory)-[:CATEGORYDETECT_IN_RPCATEGORY]-(cd:CategoryDetect)
-                       WITH split(cd.Title," ") as splitCd, cd, rp2, detect3, collect(w.Title) as word, product
-                       WHERE ALL (x in splitCd WHERE x in word)
-                       WITH dor.counter(cd.Title,toString(product.Description + " " + product.FaTitle + " " + product.EnTitle)) as dd, cd, rp2 , product, detect3 , word
-                       //-----------------------------
-                       WITH sum(dd) as wordCount, collect(cd.Id) as detect, rp2 as cat, product, detect3
-                       MATCH (cd2:CategoryDetect)
-                       WHERE cd2.Id in detect
-                       //----------------------
-                       WITH cd2, product, detect3 , cat, wordCount
-                       MERGE (product)-[:CATEGORYDETECT_HAS_PRODUCT]-(cd2)
-                       MERGE (product)-[:RP_CATEGORY_HAS_PRODUCT {DetectCount:wordCount}]-(cat)
-                       WITH wordCount, cat, product, detect3 ORDER BY wordCount DESC limit 1
-                       MERGE (cat)-[:PRODUCT_HAS_MAIN_RPCATEGORY {DetectCount:wordCount}]-(product)
-                       WITH detect3,product,cat
-                       MATCH (cd3:SpecDetect)-[:SPECDETECT_IN_SPEC]-(:Spec)-[:SPEC_HAS_CATEGORY]-(cat)
-                       WHERE cd3.Id IN detect3
-                       MERGE (product)-[r5:SPECDETECT_HAS_PRODUCT]->(cd3)""".trimMargin()
+            val query = """
+                        //--------start match product and words--------
+                        MATCH (product:Product {HashTitle:'${product.getProperty("HashTitle")}'})-[:PRODUCT_HAS_DESCRIPTION|:PRODUCT_HAS_PERSIANTITLE|:PRODUCT_HAS_ENGLISHTITLE]-(ww:Word)
+                        WITH ww, product
+                        CALL apoc.path.subgraphNodes(ww,{ relationshipFilter:'NEXT>', labelFilter:'Word', filterStartNode:true, limit:-1}) yield node as w
+                        WITH collect(w.Title) as word, product
+                        WITH reduce(v='|', x in word | v + x + '|') as arrayAsString, product
+                        //--------end match product and words-------
+                        //--------start match category by specdetect-------
+                        MATCH (s:SiteConfiguration)-[:SPECDETECT_IN_SITE]-(spd:SpecDetect)-[:SPECDETECT_IN_SPEC]-(spec:Spec)
+                        WHERE s.SiteId = 'a462b94d-687f-486b-9595-065922b09d8b'
+                        WITH split(spd.Title," ") as splitSpd, spd, arrayAsString, product
+                        WITH splitSpd, reduce(v='|', x in splitSpd | v + x + '|') as testAsString, spd, product, arrayAsString
+                        WHERE arrayAsString CONTAINS testAsString
+                        WITH DISTINCT spd, product, arrayAsString
+                        MATCH (spd)-[:SPECDETECT_IN_SPEC]-(:Spec)-[:SPEC_HAS_CATEGORY]-(rp:RPCategory)
+                        WITH collect(spd.Id) as detect3, rp, product, arrayAsString
+                        //--------end match category by specdetect-------
+                        //--------start match category by categorydetect-------
+                        MATCH (rp)-[:RPC_IS_RPC_CHILD*0..]->(rp2:RPCategory)-[:CATEGORYDETECT_IN_RPCATEGORY]-(cd:CategoryDetect)
+                        WITH split(cd.Title," ") as splitCd, cd, rp2, detect3, arrayAsString, product
+                        WITH splitCd, reduce(v='|', x in splitCd | v + x + '|') as testAsString, cd, rp2, product, detect3, arrayAsString
+                        WHERE arrayAsString CONTAINS testAsString
+                        WITH length(split(replace(arrayAsString,testAsString,"@"), "@")) -1 as dd, cd, rp2 , product, detect3, arrayAsString
+                        //--------end match category by categorydetect-------
+                        //--------start create category and spec rels-------
+                        MERGE (product)-[:CATEGORYDETECT_HAS_PRODUCT {DetectCount:dd}]-(cd)
+                        WITH sum(dd) as sumCd, rp2, product, detect3, arrayAsString
+                        MERGE (product)-[:RP_CATEGORY_HAS_PRODUCT {DetectCount:sumCd}]-(rp2)
+                        WITH sumCd, rp2, product, detect3, arrayAsString ORDER BY sumCd DESC limit 1
+                        MERGE (rp2)-[:PRODUCT_HAS_MAIN_RPCATEGORY {DetectCount:sumCd}]-(product)
+                        WITH detect3, product, rp2, arrayAsString
+                        MATCH (cd3:SpecDetect)-[:SPECDETECT_IN_SPEC]-(:Spec)-[:SPEC_HAS_CATEGORY]-(rp2)
+                        WHERE cd3.Id IN detect3
+                        MERGE (product)-[r5:SPECDETECT_HAS_PRODUCT]->(cd3)
+                        WITH distinct arrayAsString, product
+                        //--------end create category and spec rels-------
+                        //--------start match brand by branddetect-------
+                        MATCH (s:SiteConfiguration)-[:BRAND_IN_SITE]-(c3:Brand)-[:BRANDDEDETECT_IN_BRAND]-(cd3:BrandDetect)
+                        WHERE s.SiteId = 'a462b94d-687f-486b-9595-065922b09d8b'
+                        WITH split(cd3.Title," ") as d3, c3, cd3, arrayAsString, product
+                        WITH d3,reduce(v='|', x in d3 | v + x + '|') as testAsString, cd3, c3, product, arrayAsString
+                        WHERE arrayAsString CONTAINS testAsString
+                        WITH length(split(replace(arrayAsString,testAsString,"@"), "@"))-1 as dd, cd3, c3, product, arrayAsString
+                        MERGE (product)-[:BRANDDETECT_HAS_PRODUCT {DetectCount:dd}]-(cd3)
+                        WITH sum(dd) as wordCount3, c3 as cat3, product, arrayAsString
+                        MERGE (product)-[:PRODUCT_HAS_BRAND {DetectCount:wordCount3}]-(cat3)
+                        WITH wordCount3, cat3, product, arrayAsString order by wordCount3 DESC limit 1
+                        MERGE (cat3)-[:PRODUCT_HAS_MAIN_BRAND {DetectCount:wordCount3}]-(product)
+                        WITH distinct arrayAsString, product
+                        //--------end match brand by branddetect-------
+                        //--------start match fact by factdetect-------
+                        MATCH (s:SiteConfiguration)-[:FACT_IN_SITE]-(c3:Fact)-[:FACTDETECT_IN_FACT]-(cd3:FactDetect)
+                        WHERE s.SiteId = 'a462b94d-687f-486b-9595-065922b09d8b'
+                        WITH split(cd3.Title," ") as d3, c3, cd3, arrayAsString, product
+                        WITH d3,reduce(v='|', x in d3 | v + x + '|') as testAsString, cd3, c3, product, arrayAsString
+                        WHERE arrayAsString CONTAINS testAsString
+                        WITH length(split(replace(arrayAsString,testAsString,"@"), "@"))-1 as dd, cd3, c3, product, arrayAsString
+                        MERGE (product)-[:FACTDETECT_HAS_PRODUCT {DetectCount:dd}]-(cd3)
+                        WITH sum(dd) as wordCount3, c3 as cat3, product, arrayAsString
+                        MERGE (product)-[:FACT_HAS_PRODUCT {DetectCount:wordCount3}]-(cat3)
+                        //--------end match fact by factdetect-------""".trimMargin()
 
-            var queryFact = """
-                           MATCH (p:Product {HashTitle:'${product.getProperty("HashTitle")}'})-[:PRODUCT_HAS_DESCRIPTION|:PRODUCT_HAS_PERSIANTITLE|:PRODUCT_HAS_ENGLISHTITLE]-(:Word)-[:NEXT*0..]-(w3:Word)
-                           WITH p, w3
-                           MATCH (s3:SiteConfiguration)-[:FACT_IN_SITE]-(c3:Fact)-[:FACTDETECT_IN_FACT]-(cd3:FactDetect)
-                           WHERE s3.SiteId = 'a462b94d-687f-486b-9595-065922b09d8b'
-                           WITH split(cd3.Title," ") as d3, c3, cd3, collect(w3.Title) as word, p
-                           WHERE ALL(x in d3 WHERE x in word)
-                           WITH reduce(t=trim(toLower(p.Description)), delim in ["’", "'", "[", "]", "(", ")", "{", "}", "⟨", "⟩", ":", ",", "،", "、", "‒", "–", "—", "…", "...", "⋯", "᠁", "ฯ", "!", ".", "‹", "›", "«", "»", "‐", "-", "?", "‘", "’", "“", "”", "'", "'", '"', ";", "/", "·", "&", "*", "@", "\\", "•", " ^ ", "°", "”", "#", "÷", "×", "º", "ª", "%", "‰", "+", "−", "=", "‱", "¶", "′", "″", "‴", "§", "~", "_", "|", "‖", "¦", "©", "℗", "®", "℠", "،", "؟", "»", "«", "-", "؛", "..."] | replace(t,delim,"")) as normalizedDesc, cd3, c3, p
-                           WITH reduce(t=trim(toLower(p.FaTitle)), delim in ["’", "'", "[", "]", "(", ")", "{", "}", "⟨", "⟩", ":", ",", "،", "、", "‒", "–", "—", "…", "...", "⋯", "᠁", "ฯ", "!", ".", "‹", "›", "«", "»", "‐", "-", "?", "‘", "’", "“", "”", "'", "'", '"', ";", "/", "·", "&", "*", "@", "\\", "•", " ^ ", "°", "”", "#", "÷", "×", "º", "ª", "%", "‰", "+", "−", "=", "‱", "¶", "′", "″", "‴", "§", "~", "_", "|", "‖", "¦", "©", "℗", "®", "℠", "،", "؟", "»", "«", "-", "؛", "..."] | replace(t,delim,"")) as normalizedFaTitle, cd3, c3, p, normalizedDesc
-                           WITH reduce(t=trim(toLower(p.EnTitle)), delim in ["’", "'", "[", "]", "(", ")", "{", "}", "⟨", "⟩", ":", ",", "،", "、", "‒", "–", "—", "…", "...", "⋯", "᠁", "ฯ", "!", ".", "‹", "›", "«", "»", "‐", "-", "?", "‘", "’", "“", "”", "'", "'", '"', ";", "/", "·", "&", "*", "@", "\\", "•", " ^ ", "°", "”", "#", "÷", "×", "º", "ª", "%", "‰", "+", "−", "=", "‱", "¶", "′", "″", "‴", "§", "~", "_", "|", "‖", "¦", "©", "℗", "®", "℠", "،", "؟", "»", "«", "-", "؛", "..."] | replace(t,delim,"")) as normalizedEnTitle, cd3, c3, p, normalizedDesc, normalizedFaTitle
-                           WITH dor.counter(cd3.Title,toString(normalizedDesc + " " + normalizedFaTitle + " " + normalizedEnTitle)) as dd, cd3, c3, p
-                           WITH sum(dd) as wordCount3, collect(cd3.Id) as detect3, c3 as cat3, p
-                           MATCH (cd4:FactDetect)
-                           WHERE cd4.Id in detect3
-                           WITH cd4, p, cat3, wordCount3
-                           MERGE (p)-[:FACTDETECT_HAS_PRODUCT]-(cd4)
-                           MERGE (p)-[:FACT_HAS_PRODUCT {DetectCount:wordCount3}]-(cat3)""".trimMargin()
 
-            var queryBrand = """
-                           MATCH (p:Product {HashTitle:'${product.getProperty("HashTitle")}'})-[:PRODUCT_HAS_DESCRIPTION|:PRODUCT_HAS_PERSIANTITLE|:PRODUCT_HAS_ENGLISHTITLE]-(:Word)-[:NEXT*0..]-(w3:Word)
-                           WITH p, w3
-                           MATCH (s3:SiteConfiguration)-[:BRAND_IN_SITE]-(c3:Brand)-[:BRANDDEDETECT_IN_BRAND]-(cd3:BrandDetect)
-                           WHERE s3.SiteId = 'a462b94d-687f-486b-9595-065922b09d8b'
-                           WITH split(cd3.Title," ") as d3, c3, cd3, collect(w3.Title) as word, p
-                           WHERE ALL(x in d3 WHERE x in word)
-                           WITH reduce(t=trim(toLower(p.Description)), delim in ["’", "'", "[", "]", "(", ")", "{", "}", "⟨", "⟩", ":", ",", "،", "、", "‒", "–", "—", "…", "...", "⋯", "᠁", "ฯ", "!", ".", "‹", "›", "«", "»", "‐", "-", "?", "‘", "’", "“", "”", "'", "'", '"', ";", "/", "·", "&", "*", "@", "\\", "•", " ^ ", "°", "”", "#", "÷", "×", "º", "ª", "%", "‰", "+", "−", "=", "‱", "¶", "′", "″", "‴", "§", "~", "_", "|", "‖", "¦", "©", "℗", "®", "℠", "،", "؟", "»", "«", "-", "؛", "..."] | replace(t,delim,"")) as normalizedDesc, cd3, c3, p
-                           WITH reduce(t=trim(toLower(p.FaTitle)), delim in ["’", "'", "[", "]", "(", ")", "{", "}", "⟨", "⟩", ":", ",", "،", "、", "‒", "–", "—", "…", "...", "⋯", "᠁", "ฯ", "!", ".", "‹", "›", "«", "»", "‐", "-", "?", "‘", "’", "“", "”", "'", "'", '"', ";", "/", "·", "&", "*", "@", "\\", "•", " ^ ", "°", "”", "#", "÷", "×", "º", "ª", "%", "‰", "+", "−", "=", "‱", "¶", "′", "″", "‴", "§", "~", "_", "|", "‖", "¦", "©", "℗", "®", "℠", "،", "؟", "»", "«", "-", "؛", "..."] | replace(t,delim,"")) as normalizedFaTitle, cd3, c3, p, normalizedDesc
-                           WITH reduce(t=trim(toLower(p.EnTitle)), delim in ["’", "'", "[", "]", "(", ")", "{", "}", "⟨", "⟩", ":", ",", "،", "、", "‒", "–", "—", "…", "...", "⋯", "᠁", "ฯ", "!", ".", "‹", "›", "«", "»", "‐", "-", "?", "‘", "’", "“", "”", "'", "'", '"', ";", "/", "·", "&", "*", "@", "\\", "•", " ^ ", "°", "”", "#", "÷", "×", "º", "ª", "%", "‰", "+", "−", "=", "‱", "¶", "′", "″", "‴", "§", "~", "_", "|", "‖", "¦", "©", "℗", "®", "℠", "،", "؟", "»", "«", "-", "؛", "..."] | replace(t,delim,"")) as normalizedEnTitle, cd3, c3, p, normalizedDesc, normalizedFaTitle
-                           WITH dor.counter(cd3.Title,toString(normalizedDesc + " " + normalizedFaTitle + " " + normalizedEnTitle)) as dd, cd3, c3, p
-                           WITH sum(dd) as wordCount3, collect(cd3.Id) as detect3, c3 as cat3, p
-                           //WITH split(cd3.Title," ") as d3, c3, cd3, w3, p
-                           //WHERE all(x in d3 WHERE x in w3.Title)
-                           //WITH count(w3) as wordCount3, c3 as cat3, collect(DISTINCT cd3.Id) as detect3, p
-                           MATCH (cd4:BrandDetect)
-                           WHERE cd4.Id in detect3
-                           WITH cd4, p, cat3, wordCount3
-                           MERGE (p)-[:BRANDDETECT_HAS_PRODUCT]-(cd4)
-                           MERGE (p)-[:PRODUCT_HAS_BRAND {DetectCount:wordCount3}]-(cat3)
-                           WITH wordCount3, cat3, p order by wordCount3 DESC limit 1
-                           MERGE (cat3)-[:PRODUCT_HAS_MAIN_BRAND {DetectCount:wordCount3}]-(p)""".trimMargin()
+//            var queryFact = """
+//                           MATCH (p:Product {HashTitle:'${product.getProperty("HashTitle")}'})-[:PRODUCT_HAS_DESCRIPTION|:PRODUCT_HAS_PERSIANTITLE|:PRODUCT_HAS_ENGLISHTITLE]-(ww:Word)
+//                           WITH p, ww
+//                           CALL apoc.path.subgraphNodes(ww,{ relationshipFilter:'NEXT>', labelFilter:'Word', filterStartNode:true, limit:-1}) yield node as w3
+//                           WITH w3, p
+//                           MATCH (s3:SiteConfiguration)-[:FACT_IN_SITE]-(c3:Fact)-[:FACTDETECT_IN_FACT]-(cd3:FactDetect)
+//                           WHERE s3.SiteId = 'a462b94d-687f-486b-9595-065922b09d8b'
+//                           WITH split(cd3.Title," ") as d3, c3, cd3, collect(w3.Title) as word, p
+//                           WITH d3,reduce(v='|', x in d3 | v + x + '|') as testAsString, reduce(v='|', x in word | v + x + '|') as arrayAsString, cd3, c3, p
+//                           WHERE arrayAsString CONTAINS testAsString
+//                           //WITH reduce(t=trim(toLower(p.Description)), delim in ["’", "'", "[", "]", "(", ")", "{", "}", "⟨", "⟩", ":", ",", "،", "、", "‒", "–", "—", "…", "...", "⋯", "᠁", "ฯ", "!", ".", "‹", "›", "«", "»", "‐", "-", "?", "‘", "’", "“", "”", "'", "'", '"', ";", "/", "·", "&", "*", "@", "\\", "•", " ^ ", "°", "”", "#", "÷", "×", "º", "ª", "%", "‰", "+", "−", "=", "‱", "¶", "′", "″", "‴", "§", "~", "_", "|", "‖", "¦", "©", "℗", "®", "℠", "،", "؟", "»", "«", "-", "؛", "..."] | replace(t,delim,"")) as normalizedDesc, cd3, c3, p
+//                           //WITH reduce(t=trim(toLower(p.FaTitle)), delim in ["’", "'", "[", "]", "(", ")", "{", "}", "⟨", "⟩", ":", ",", "،", "、", "‒", "–", "—", "…", "...", "⋯", "᠁", "ฯ", "!", ".", "‹", "›", "«", "»", "‐", "-", "?", "‘", "’", "“", "”", "'", "'", '"', ";", "/", "·", "&", "*", "@", "\\", "•", " ^ ", "°", "”", "#", "÷", "×", "º", "ª", "%", "‰", "+", "−", "=", "‱", "¶", "′", "″", "‴", "§", "~", "_", "|", "‖", "¦", "©", "℗", "®", "℠", "،", "؟", "»", "«", "-", "؛", "..."] | replace(t,delim,"")) as normalizedFaTitle, cd3, c3, p, normalizedDesc
+//                           //WITH reduce(t=trim(toLower(p.EnTitle)), delim in ["’", "'", "[", "]", "(", ")", "{", "}", "⟨", "⟩", ":", ",", "،", "、", "‒", "–", "—", "…", "...", "⋯", "᠁", "ฯ", "!", ".", "‹", "›", "«", "»", "‐", "-", "?", "‘", "’", "“", "”", "'", "'", '"', ";", "/", "·", "&", "*", "@", "\\", "•", " ^ ", "°", "”", "#", "÷", "×", "º", "ª", "%", "‰", "+", "−", "=", "‱", "¶", "′", "″", "‴", "§", "~", "_", "|", "‖", "¦", "©", "℗", "®", "℠", "،", "؟", "»", "«", "-", "؛", "..."] | replace(t,delim,"")) as normalizedEnTitle, cd3, c3, p, normalizedDesc, normalizedFaTitle
+//                           WITH length(split(replace(arrayAsString,testAsString,"@"), "@"))-1 as dd, cd3, c3, p
+//                           MERGE (p)-[:FACTDETECT_HAS_PRODUCT {DetectCount:dd}]-(cd3)
+//                           //WITH dor.counter(cd3.Title,toString(normalizedDesc + " " + normalizedFaTitle + " " + normalizedEnTitle)) as dd, cd3, c3, p
+//                           WITH sum(dd) as wordCount3, c3 as cat3, p
+//                           MERGE (p)-[:FACT_HAS_PRODUCT {DetectCount:wordCount3}]-(cat3)""".trimMargin()
+
 
             db.execute(queryDelete)
             db.execute(query)
-            db.execute(queryFact)
-            db.execute(queryBrand)
 
             return true
         } catch (e: Exception) {
@@ -354,104 +363,85 @@ class ProcessData {
     private fun analyseAllProduct(): Boolean {
         try {
 
-            var query = """
-                       MATCH (product:Product)-[:PRODUCT_HAS_DESCRIPTION|:PRODUCT_HAS_PERSIANTITLE|:PRODUCT_HAS_ENGLISHTITLE]-(:Word)-[:NEXT*0..]-(w:Word)
-                       WITH w, product
-                       //----------------------------
-                       MATCH (s:SiteConfiguration)-[:RP_CATEGORY_IN_SITE]-(rp:RPCategory)-[:SPEC_HAS_CATEGORY]-(spec:Spec)-[:SPECDETECT_IN_SPEC]-(spd:SpecDetect)
-                       WHERE s.SiteId = 'a462b94d-687f-486b-9595-065922b09d8b'
-                       WITH split(spd.Title," ") as splitSpd, spec, spd, rp, collect(w.Title) as word, product
-                       WHERE ALL(x in splitSpd WHERE x in word)
-                       With rp, spec, spd, word, product
-                       //-----------------------------
-                       Match (rp)-[:RPC_IS_RPC_CHILD*0..]-(rp2:RPCategory)-[:CATEGORYDETECT_IN_RPCATEGORY]-(cd:CategoryDetect)
-                       WITH split(cd.Title," ") as splitCd, cd, rp2, spec, spd, word, product
-                       WHERE ALL (x in splitCd WHERE x in word)
-                       WITH dor.counter(cd.Title,toString(product.Description + " " + product.FaTitle + " " + product.EnTitle)) as dd, cd, rp2 ,spec, product, spd , word
-                       //-----------------------------
-                       WITH sum(dd) as wordCount, collect(cd.Id) as detect, rp2 as cat, product, spec,spd
-                       MATCH (cd2:CategoryDetect)
-                       WHERE cd2.Id in detect
-                       WITH cd2, product, cat, wordCount, spec,spd
-                       //----------------------------
-                       OPTIONAL MATCH (product)-[r:CATEGORYDETECT_HAS_PRODUCT]-(:CategoryDetect)
-                       DELETE r
-                       WITH cd2, product, spec,spd , cat, wordCount
-                       OPTIONAL MATCH (product)-[r2:RP_CATEGORY_HAS_PRODUCT]-(:RPCategory)
-                       DELETE r2
-                       WITH cd2, product, spec,spd , cat, wordCount
-                       OPTIONAL MATCH (product)<-[r3:PRODUCT_HAS_MAIN_RPCATEGORY]-(:RPCategory)
-                       DELETE r3
-                       WITH cd2, product, spec,spd , cat, wordCount
-                       OPTIONAL MATCH (product)<-[r5:PRODUCT_HAS_SPECDETECT]-(:SpecDetect)
-                       DELETE r5
-                       //----------------------
-                       WITH cd2, product, spec,spd , cat, wordCount
-                       MERGE (product)-[:CATEGORYDETECT_HAS_PRODUCT]-(cd2)
-                       MERGE (product)-[:RP_CATEGORY_HAS_PRODUCT {DetectCount:wordCount}]-(cat)
-                       WITH collect(DISTINCT spd.Id) as detect, wordCount, cat, product
-                       WITH wordCount, cat, product, detect ORDER BY wordCount DESC limit 1
-                       MATCH (spd2:SpecDetect)-[:SPECDETECT_IN_SPEC]-(:Spec)-[:SPEC_HAS_CATEGORY]-(cat)
-                       WHERE spd2.Id in detect
-                       MERGE (spd2)<-[:SPECDETECT_HAS_PRODUCT]-(product)
-                       MERGE (cat)-[:PRODUCT_HAS_MAIN_RPCATEGORY {DetectCount:wordCount}]-(product)""".trimMargin()
+            var queryDelete = """
+                MATCH (product:Product)
+                OPTIONAL MATCH (product)-[r:CATEGORYDETECT_HAS_PRODUCT]-(:CategoryDetect)
+                OPTIONAL MATCH (product)-[r2:RP_CATEGORY_HAS_PRODUCT]-(:RPCategory)
+                OPTIONAL MATCH (product)<-[r3:PRODUCT_HAS_MAIN_RPCATEGORY]-(:RPCategory)
+                OPTIONAL MATCH (product)-[r4:SPECDETECT_HAS_PRODUCT]-(:SpecDetect)
+                OPTIONAL MATCH (product)-[r5:FACTDETECT_HAS_PRODUCT]-(:FactDetect)
+                OPTIONAL MATCH (product)-[r6:FACT_HAS_PRODUCT]-(:Fact)
+                OPTIONAL MATCH (product)-[r7:BRANDDETECT_HAS_PRODUCT]-(:BrandDetect)
+                OPTIONAL MATCH (product)-[r8:PRODUCT_HAS_BRAND]-(:Brand)
+                OPTIONAL MATCH (product)<-[r9:PRODUCT_HAS_MAIN_BRAND]-(:Brand)
+                DELETE r,r2,r3,r4,r5,r6,r7,r8,r9
+                """.trimMargin()
 
-            var queryFact = """
-                           MATCH (p:Product)-[:PRODUCT_HAS_DESCRIPTION|:PRODUCT_HAS_PERSIANTITLE|:PRODUCT_HAS_ENGLISHTITLE]-(:Word)-[:NEXT*0..]-(w3:Word)
-                           WITH p, w3
-                           MATCH (s3:SiteConfiguration)-[:FACT_IN_SITE]-(c3:Fact)-[:FACTDETECT_IN_FACT]-(cd3:FactDetect)
-                           WHERE s3.SiteId = 'a462b94d-687f-486b-9595-065922b09d8b'
-                           WITH split(cd3.Title," ") as d3, c3, cd3, collect(w3.Title) as word, p
-                           WHERE ALL(x in d3 WHERE x in word)
-                           WITH reduce(t=trim(toLower(p.Description)), delim in ["’", "'", "[", "]", "(", ")", "{", "}", "⟨", "⟩", ":", ",", "،", "、", "‒", "–", "—", "…", "...", "⋯", "᠁", "ฯ", "!", ".", "‹", "›", "«", "»", "‐", "-", "?", "‘", "’", "“", "”", "'", "'", '"', ";", "/", "·", "&", "*", "@", "\\", "•", " ^ ", "°", "”", "#", "÷", "×", "º", "ª", "%", "‰", "+", "−", "=", "‱", "¶", "′", "″", "‴", "§", "~", "_", "|", "‖", "¦", "©", "℗", "®", "℠", "،", "؟", "»", "«", "-", "؛", "..."] | replace(t,delim,"")) as normalizedDesc, cd3, c3, p
-                           WITH reduce(t=trim(toLower(p.FaTitle)), delim in ["’", "'", "[", "]", "(", ")", "{", "}", "⟨", "⟩", ":", ",", "،", "、", "‒", "–", "—", "…", "...", "⋯", "᠁", "ฯ", "!", ".", "‹", "›", "«", "»", "‐", "-", "?", "‘", "’", "“", "”", "'", "'", '"', ";", "/", "·", "&", "*", "@", "\\", "•", " ^ ", "°", "”", "#", "÷", "×", "º", "ª", "%", "‰", "+", "−", "=", "‱", "¶", "′", "″", "‴", "§", "~", "_", "|", "‖", "¦", "©", "℗", "®", "℠", "،", "؟", "»", "«", "-", "؛", "..."] | replace(t,delim,"")) as normalizedFaTitle, cd3, c3, p, normalizedDesc
-                           WITH reduce(t=trim(toLower(p.EnTitle)), delim in ["’", "'", "[", "]", "(", ")", "{", "}", "⟨", "⟩", ":", ",", "،", "、", "‒", "–", "—", "…", "...", "⋯", "᠁", "ฯ", "!", ".", "‹", "›", "«", "»", "‐", "-", "?", "‘", "’", "“", "”", "'", "'", '"', ";", "/", "·", "&", "*", "@", "\\", "•", " ^ ", "°", "”", "#", "÷", "×", "º", "ª", "%", "‰", "+", "−", "=", "‱", "¶", "′", "″", "‴", "§", "~", "_", "|", "‖", "¦", "©", "℗", "®", "℠", "،", "؟", "»", "«", "-", "؛", "..."] | replace(t,delim,"")) as normalizedEnTitle, cd3, c3, p, normalizedDesc, normalizedFaTitle
-                           WITH dor.counter(cd3.Title,toString(normalizedDesc + " " + normalizedFaTitle + " " + normalizedEnTitle)) as dd, cd3, c3, p
-                           WITH sum(dd) as wordCount3, collect(cd3.Id) as detect3, c3 as cat3, p
-                           MATCH (cd4:FactDetect)
-                           WHERE cd4.Id in detect3
-                           WITH cd4, p, cat3, wordCount3
-                           OPTIONAL MATCH (p)-[r:FACTDETECT_HAS_PRODUCT]-(:FactDetect)
-                           DELETE r
-                           WITH cd4, p, cat3, wordCount3
-                           OPTIONAL MATCH (p)-[r2:FACT_HAS_PRODUCT]-(:Fact)
-                           DELETE r2
-                           WITH cd4, p, cat3, wordCount3
-                           MERGE (p)-[:FACTDETECT_HAS_PRODUCT]-(cd4)
-                           MERGE (p)-[:FACT_HAS_PRODUCT {DetectCount:wordCount3}]-(cat3)""".trimMargin()
+            val query = """
+                        //--------start match product and words--------
+                        MATCH (product:Product)-[:PRODUCT_HAS_DESCRIPTION|:PRODUCT_HAS_PERSIANTITLE|:PRODUCT_HAS_ENGLISHTITLE]-(ww:Word)
+                        WITH ww, product
+                        CALL apoc.path.subgraphNodes(ww,{ relationshipFilter:'NEXT>', labelFilter:'Word', filterStartNode:true, limit:-1}) yield node as w
+                        WITH collect(w.Title) as word, product
+                        WITH reduce(v='|', x in word | v + x + '|') as arrayAsString, product
+                        //--------end match product and words-------
+                        //--------start match category by specdetect-------
+                        MATCH (s:SiteConfiguration)-[:SPECDETECT_IN_SITE]-(spd:SpecDetect)-[:SPECDETECT_IN_SPEC]-(spec:Spec)
+                        WHERE s.SiteId = 'a462b94d-687f-486b-9595-065922b09d8b'
+                        WITH split(spd.Title," ") as splitSpd, spd, arrayAsString, product
+                        WITH splitSpd, reduce(v='|', x in splitSpd | v + x + '|') as testAsString, spd, product, arrayAsString
+                        WHERE arrayAsString CONTAINS testAsString
+                        WITH DISTINCT spd, product, arrayAsString
+                        MATCH (spd)-[:SPECDETECT_IN_SPEC]-(:Spec)-[:SPEC_HAS_CATEGORY]-(rp:RPCategory)
+                        WITH collect(spd.Id) as detect3, rp, product, arrayAsString
+                        //--------end match category by specdetect-------
+                        //--------start match category by categorydetect-------
+                        MATCH (rp)-[:RPC_IS_RPC_CHILD*0..]->(rp2:RPCategory)-[:CATEGORYDETECT_IN_RPCATEGORY]-(cd:CategoryDetect)
+                        WITH split(cd.Title," ") as splitCd, cd, rp2, detect3, arrayAsString, product
+                        WITH splitCd, reduce(v='|', x in splitCd | v + x + '|') as testAsString, cd, rp2, product, detect3, arrayAsString
+                        WHERE arrayAsString CONTAINS testAsString
+                        WITH length(split(replace(arrayAsString,testAsString,"@"), "@")) -1 as dd, cd, rp2 , product, detect3, arrayAsString
+                        //--------end match category by categorydetect-------
+                        //--------start create category and spec rels-------
+                        MERGE (product)-[:CATEGORYDETECT_HAS_PRODUCT {DetectCount:dd}]-(cd)
+                        WITH sum(dd) as sumCd, rp2, product, detect3, arrayAsString
+                        MERGE (product)-[:RP_CATEGORY_HAS_PRODUCT {DetectCount:sumCd}]-(rp2)
+                        WITH sumCd, rp2, product, detect3, arrayAsString ORDER BY sumCd DESC limit 1
+                        MERGE (rp2)-[:PRODUCT_HAS_MAIN_RPCATEGORY {DetectCount:sumCd}]-(product)
+                        WITH detect3, product, rp2, arrayAsString
+                        MATCH (cd3:SpecDetect)-[:SPECDETECT_IN_SPEC]-(:Spec)-[:SPEC_HAS_CATEGORY]-(rp2)
+                        WHERE cd3.Id IN detect3
+                        MERGE (product)-[r5:SPECDETECT_HAS_PRODUCT]->(cd3)
+                        WITH distinct arrayAsString, product
+                        //--------end create category and spec rels-------
+                        //--------start match brand by branddetect-------
+                        MATCH (s:SiteConfiguration)-[:BRAND_IN_SITE]-(c3:Brand)-[:BRANDDEDETECT_IN_BRAND]-(cd3:BrandDetect)
+                        WHERE s.SiteId = 'a462b94d-687f-486b-9595-065922b09d8b'
+                        WITH split(cd3.Title," ") as d3, c3, cd3, arrayAsString, product
+                        WITH d3,reduce(v='|', x in d3 | v + x + '|') as testAsString, cd3, c3, product, arrayAsString
+                        WHERE arrayAsString CONTAINS testAsString
+                        WITH length(split(replace(arrayAsString,testAsString,"@"), "@"))-1 as dd, cd3, c3, product, arrayAsString
+                        MERGE (product)-[:BRANDDETECT_HAS_PRODUCT {DetectCount:dd}]-(cd3)
+                        WITH sum(dd) as wordCount3, c3 as cat3, product, arrayAsString
+                        MERGE (product)-[:PRODUCT_HAS_BRAND {DetectCount:wordCount3}]-(cat3)
+                        WITH wordCount3, cat3, product, arrayAsString order by wordCount3 DESC limit 1
+                        MERGE (cat3)-[:PRODUCT_HAS_MAIN_BRAND {DetectCount:wordCount3}]-(product)
+                        WITH distinct arrayAsString, product
+                        //--------end match brand by branddetect-------
+                        //--------start match fact by factdetect-------
+                        MATCH (s:SiteConfiguration)-[:FACT_IN_SITE]-(c3:Fact)-[:FACTDETECT_IN_FACT]-(cd3:FactDetect)
+                        WHERE s.SiteId = 'a462b94d-687f-486b-9595-065922b09d8b'
+                        WITH split(cd3.Title," ") as d3, c3, cd3, arrayAsString, product
+                        WITH d3,reduce(v='|', x in d3 | v + x + '|') as testAsString, cd3, c3, product, arrayAsString
+                        WHERE arrayAsString CONTAINS testAsString
+                        WITH length(split(replace(arrayAsString,testAsString,"@"), "@"))-1 as dd, cd3, c3, product, arrayAsString
+                        MERGE (product)-[:FACTDETECT_HAS_PRODUCT {DetectCount:dd}]-(cd3)
+                        WITH sum(dd) as wordCount3, c3 as cat3, product, arrayAsString
+                        MERGE (product)-[:FACT_HAS_PRODUCT {DetectCount:wordCount3}]-(cat3)
+                        //--------end match fact by factdetect-------""".trimMargin()
 
-            var queryBrand = """
-                           MATCH (p:Product)-[:PRODUCT_HAS_DESCRIPTION|:PRODUCT_HAS_PERSIANTITLE|:PRODUCT_HAS_ENGLISHTITLE]-(:Word)-[:NEXT*]-(w3:Word)
-                           WITH p, w3
-                           MATCH (s3:SiteConfiguration)-[:BRAND_IN_SITE]-(c3:Brand)-[:BRANDDEDETECT_IN_BRAND]-(cd3:BrandDetect)
-                           WHERE s3.SiteId = 'a462b94d-687f-486b-9595-065922b09d8b'
-                           WITH split(cd3.Title," ") as d3, c3, cd3, collect(w3.Title) as word, p
-                           WHERE ALL(x in d3 WHERE x in word)
-                           WITH dor.counter(cd3.Title,toString(p.Description + " " + p.FaTitle + " " + p.EnTitle)) as dd, cd3, c3, p
-                           WITH sum(dd) as wordCount3, collect(cd3.Id) as detect3, c3 as cat3, p
-                           //WITH split(cd3.Title," ") as d3, c3, cd3, w3, p
-                           //WHERE all(x in d3 WHERE x in w3.Title)
-                           //WITH count(w3) as wordCount3, c3 as cat3, collect(DISTINCT cd3.Id) as detect3, p
-                           MATCH (cd4:BrandDetect)
-                           WHERE cd4.Id in detect3
-                           WITH cd4, p, cat3, wordCount3
-                           OPTIONAL MATCH (p)-[r:BRANDDETECT_HAS_PRODUCT]-(:BrandDetect)
-                           DELETE r
-                           WITH cd4, p, cat3, wordCount3
-                           OPTIONAL MATCH (p)-[r2:PRODUCT_HAS_BRAND]-(:Brand)
-                           DELETE r2
-                           WITH cd4, p, cat3, wordCount3
-                           OPTIONAL MATCH (p)<-[r3:PRODUCT_HAS_MAIN_BRAND]-(:Brand)
-                           DELETE r3
-                           WITH cd4, p, cat3, wordCount3
-                           MERGE (p)-[:BRANDDETECT_HAS_PRODUCT]-(cd4)
-                           MERGE (p)-[:PRODUCT_HAS_BRAND {DetectCount:wordCount3}]-(cat3)
-                           WITH wordCount3, cat3, p order by wordCount3 DESC limit 1
-                           MERGE (cat3)-[:PRODUCT_HAS_MAIN_BRAND {DetectCount:wordCount3}]-(p)""".trimMargin()
-
+            db.execute(queryDelete)
             db.execute(query)
-            db.execute(queryFact)
-            db.execute(queryBrand)
             return true
         } catch (e: Exception) {
             log.info("Error: " + e.message)
