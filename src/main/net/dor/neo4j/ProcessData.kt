@@ -144,24 +144,26 @@ class ProcessData {
 
     @Procedure(name = "dor.createProduct", mode = Mode.WRITE)
     fun createProduct(@Name("FaTitle") FaTitle: String, @Name("EnTitle") EnTitle: String, @Name("Description") Description: String, @Name("Price") Price: Long, @Name("SourceURL") SourceUrl: String, @Name("ImagePath") ImagePath: String) {
-//        val newquery = """
-//        WITH split("My phone frequently calls drop frequently with the iPhone"," ") as words
-//        UNWIND range(0,size(words)-2) as i
-//        merge(w3:Word {name:words[i],hash:dor.sha256(words[i]+i)})
-//        merge(w4:Word {name:words[i+1],hash:dor.sha256(words[i+1]+(i+1))})
-//        create (w3)-[:NEXT]->(w4)
-//         """
-
+        val t1 = System.currentTimeMillis()
         val hashFaTitle = Sha256Maker(FaTitle)
+
         val product: Node? = db.findNode(EngineLable.productLabel(), "HashTitle", hashFaTitle)
+        val site: Node? = db.findNode(EngineLable.rsLabel(), "SiteId", "50cfc9e8-402b-495b-8ed4-66dcb2b3aadd")
 
         if (product == null) {
             val id = CreateUUID()
-            val q = """CREATE (c:Product { FaTitle:"$FaTitle", EnTitle:"$EnTitle", Description:"$Description", Price:"$Price", SourceUrl:"$SourceUrl", ImagePath:"$ImagePath", HashTitle:"$hashFaTitle",Id:"$id" })
-                       WITH c
-                       MATCH (rs:RS)
-                       WHERE rs.SiteId = "50cfc9e8-402b-495b-8ed4-66dcb2b3aadd"
-                       CREATE UNIQUE (rs)<-[:${Relations.PRODUCT_IN_RS.toString()}]-(c)""".trimMargin()
+
+            val p = db.createNode(EngineLable.productLabel())
+            p.setProperty("FaTitle", FaTitle)
+            p.setProperty("EnTitle", EnTitle)
+            p.setProperty("Description", Description)
+            p.setProperty("Price", Price)
+            p.setProperty("SourceUrl", SourceUrl)
+            p.setProperty("ImagePath", ImagePath)
+            p.setProperty("HashTitle", hashFaTitle)
+            p.setProperty("Id", id)
+            p.createRelationshipTo(site, RelationshipType { Relations.PRODUCT_IN_RS.toString() })
+
 
             val descQuery = """
                 //Description Chain
@@ -206,24 +208,16 @@ class ProcessData {
                    MERGE (c)-[:PRODUCT_HAS_ENGLISHTITLE]->(w)
                    """.trimMargin()
 
-            val updateCounter = """
-                    MATCH (rs:RS)
-                    WHERE rs.SiteId = "50cfc9e8-402b-495b-8ed4-66dcb2b3aadd"
-                    WITH rs.CountedProduct as count, rs
-                    SET rs.CountedProduct = count + 1""".trimMargin();
-
-            db.execute(q)
             db.execute(descQuery)
             db.execute(titleQuery)
             db.execute(enTitleQuery)
-            db.execute(updateCounter)
 
-            val product: Node = db.findNode(EngineLable.productLabel(), "Id", id)
-            analyseProduct(product)
+            analyseProduct(p)
         } else {
             analyseProduct(product)
         }
-
+        val t2 = System.currentTimeMillis()
+        log.info("here2 ${t2 - t1}")
     }
 
     @Procedure(name = "dor.defineProduct", mode = Mode.WRITE)
@@ -528,6 +522,7 @@ class ProcessData {
 class EngineLable {
     companion object {
         fun productLabel(): Label = Label.label("Product")
+        fun rsLabel(): Label = Label.label("RS")
     }
 }
 
