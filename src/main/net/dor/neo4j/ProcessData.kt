@@ -126,6 +126,17 @@ class ProcessData {
         return h.hash(data)
     }
 
+    @UserFunction(name = "dor.replace")
+    @Description("replace And Normalize Text for Analyse")
+    fun replace(@Name("Text") text: String): String {
+
+        val re = Regex("(?<!\\d)\\.(?!\\d)")
+        var tempText: String
+        tempText = re.replace(text, "")
+        tempText = tempText.toLowerCase().trim().replace("’", "").replace("'", "").replace("[", "").replace("]", "").replace("(", "").replace(")", "").replace("{", "").replace("}", "").replace("⟨", "").replace("⟩", "").replace(":", "").replace(",", "").replace("،", "").replace("、", "").replace("‒", "").replace("–", "").replace("—", "").replace("―", "").replace("…", "").replace("...", "").replace("⋯", "").replace("᠁", "").replace("ฯ", "").replace("!", "").replace("‹", "").replace("›", "").replace("«", "").replace("»", "").replace("‐", "").replace("-", "").replace("?", "").replace("‘", "").replace("’", "").replace("“", "").replace("”", "").replace("'", "").replace("'", "").replace("\"", "").replace(";", "").replace("/", "").replace("·", "").replace("&", "").replace("*", "").replace("@", "").replace("\\", "").replace("•", "").replace(" ^ ", "").replace("°", "").replace("”", "").replace("#", "").replace("÷", "").replace("×", "").replace("º", "").replace("ª", "").replace("%", "").replace("‰", "").replace("+", "").replace("−", "").replace("=", "").replace("‱", "").replace("¶", "").replace("′", "").replace("″", "").replace("‴", "").replace("§", "").replace("~", "").replace("_", "").replace("|", "").replace("‖", "").replace("¦", "").replace("©", "").replace("℗", "").replace("®", "").replace("℠", "").replace("،", "").replace("؟", "").replace("»", "").replace("«", "").replace("؛", "").replace("-", "").replace("...", "").replace("ً", "").replace("ٌ", "").replace("ٍ", "").replace("َ", "").replace("ُ", "").replace("ِ", "").replace("  ", " ").replace("ي", "ی").replace("ك", "ک").replace("1", "۱").replace("2", "۲").replace("3", "۳").replace("4", "۴").replace("5", "۵").replace("6", "۶").replace("7", "۷").replace("8", "۸").replace("9", "۹").replace("0", "۰")
+        return tempText
+    }
+
 
     @UserFunction(name = "dor.counter")
     fun counter(@Name("Detect") pattern: String, @Name("Description") text: String): Number {
@@ -143,81 +154,78 @@ class ProcessData {
     }
 
     @Procedure(name = "dor.createProduct", mode = Mode.WRITE)
-    fun createProduct(@Name("FaTitle") FaTitle: String, @Name("EnTitle") EnTitle: String, @Name("Description") Description: String, @Name("Price") Price: Long, @Name("SourceURL") SourceUrl: String, @Name("ImagePath") ImagePath: String) {
-        val t1 = System.currentTimeMillis()
-        val hashFaTitle = Sha256Maker(FaTitle)
+    fun createProduct(@Name("FaTitle") FaTitle: String, @Name("EnTitle") EnTitle: String, @Name("Description") Description: String, @Name("Price") Price: Long, @Name("SourceURL") SourceUrl: String, @Name("ImagePath") ImagePath: String, @Name("Spec") Spec: String) {
 
-        val product: Node? = db.findNode(EngineLable.productLabel(), "HashTitle", hashFaTitle)
-        val site: Node? = db.findNode(EngineLable.rsLabel(), "SiteId", "50cfc9e8-402b-495b-8ed4-66dcb2b3aadd")
+        try {
+            val hashFaTitle = Sha256Maker(FaTitle)
+            val product: Node? = db.findNode(EngineLable.productLabel(), "HashTitle", hashFaTitle)
+            val site: Node? = db.findNode(EngineLable.rsLabel(), "SiteId", "50cfc9e8-402b-495b-8ed4-66dcb2b3aadd")
 
-        if (product == null) {
-            val id = CreateUUID()
+            if (product == null) {
+                var flag = false
+                val tempDesc = "${Description.trim()} ${FaTitle.trim()} ${EnTitle.trim()} ${Spec.trim()}"
+                val query = """
+                        //--------start match product and words--------
+                        WITH "$tempDesc" as w1
+                        WITH dor.replace(w1) as w
+                        WITH SPLIT(w, " ") as word
+                        WITH reduce(v='|', x in word | v + x + '|') as arrayAsString
+                        //--------end match product and words-------
+                        //--------start match category by specdetect-------
+                        MATCH (s:SiteConfiguration)-[:SPECDETECT_IN_SITE]-(spd:SpecDetect)-[:SPECDETECT_IN_SPEC]-(spec:Spec)
+                        WHERE s.SiteId = 'a462b94d-687f-486b-9595-065922b09d8b'
+                        WITH split(spd.Title," ") as splitSpd, spd, arrayAsString
+                        WITH splitSpd, reduce(v='|', x in splitSpd | v + x + '|') as testAsString, spd, arrayAsString
+                        WHERE arrayAsString CONTAINS testAsString
+                        RETURN spd""".trimMargin()
 
-            val p = db.createNode(EngineLable.productLabel())
-            p.setProperty("FaTitle", FaTitle)
-            p.setProperty("EnTitle", EnTitle)
-            p.setProperty("Description", Description)
-            p.setProperty("Price", Price)
-            p.setProperty("SourceUrl", SourceUrl)
-            p.setProperty("ImagePath", ImagePath)
-            p.setProperty("HashTitle", hashFaTitle)
-            p.setProperty("Id", id)
-            p.createRelationshipTo(site, RelationshipType { Relations.PRODUCT_IN_RS.toString() })
+                val result = db.execute(query)
 
+                if (result.hasNext()) {
+                    flag = true
+                }
 
-            val descQuery = """
-                //Description Chain
-                   MATCH (c:Product)
-                   WHERE c.Id = "$id"
-                   WITH reduce(t=trim(toLower(c.Description)), delim in ["’", "'", "[", "]", "(", ")", "{", "}", "⟨", "⟩", ":", ",", "،", "、", "‒", "–", "—", "…", "...", "⋯", "᠁", "ฯ", "!", ".", "‹", "›", "«", "»", "‐", "-", "?", "‘", "’", "“", "”", "'", "'", '"', ";", "/", "·", "&", "*", "@", "\\", "•", " ^ ", "°", "”", "#", "÷", "×", "º", "ª", "%", "‰", "+", "−", "=", "‱", "¶", "′", "″", "‴", "§", "~", "_", "|", "‖", "¦", "©", "℗", "®", "℠", "،", "؟", "»", "«", "-", "؛", "..."] | replace(t,delim,"")) as normalized, c
-                   WITH split(normalized," ") as words, c
-                   UNWIND range(0,size(words)-2) as i
-                   MERGE (w3:Word {Title:words[i],Hash:dor.sha256(words[i]+i+c.Id)})
-                   MERGE (w4:Word {Title:words[i+1],Hash:dor.sha256(words[i+1]+(i+1)+c.Id)})
-                   CREATE (w3)-[:NEXT]->(w4)
-                   WITH c, words
-                   MATCH (w:Word {Hash:dor.sha256(words[0]+0+c.Id)})
-                   MERGE (c)-[:PRODUCT_HAS_DESCRIPTION]->(w)""".trimMargin()
+                if (flag) {
+                    val id = CreateUUID()
 
-            val titleQuery = """
-                   //Persian Title Chain
-                   MATCH (c:Product)
-                   WHERE c.Id = "$id"
-                   WITH reduce(t=trim(toLower(c.FaTitle)), delim in ["’", "'", "[", "]", "(", ")", "{", "}", "⟨", "⟩", ":", ",", "،", "、", "‒", "–", "—", "…", "...", "⋯", "᠁", "ฯ", "!", ".", "‹", "›", "«", "»", "‐", "-", "?", "‘", "’", "“", "”", "'", "'", '"', ";", "/", "·", "&", "*", "@", "\\", "•", " ^ ", "°", "”", "#", "÷", "×", "º", "ª", "%", "‰", "+", "−", "=", "‱", "¶", "′", "″", "‴", "§", "~", "_", "|", "‖", "¦", "©", "℗", "®", "℠", "،", "؟", "»", "«", "-", "؛", "..."] | replace(t,delim,"")) as normalized, c
-                   WITH split(normalized," ") as words, c
-                   UNWIND range(0,size(words)-2) as i
-                   MERGE(w3:Word {Title:words[i],Hash:dor.sha256(words[i]+i+c.Id)})
-                   MERGE(w4:Word {Title:words[i+1],Hash:dor.sha256(words[i+1]+(i+1)+c.Id)})
-                   CREATE (w3)-[:NEXT]->(w4)
-                   WITH c, words
-                   MATCH (w:Word {Hash:dor.sha256(words[0]+0+c.Id)})
-                   MERGE (c)-[:PRODUCT_HAS_PERSIANTITLE]->(w)""".trimMargin()
+                    val p = db.createNode(EngineLable.productLabel())
+                    p.setProperty("FaTitle", FaTitle)
+                    p.setProperty("EnTitle", EnTitle)
+                    p.setProperty("Description", Description)
+                    p.setProperty("Spec", Spec)
+                    p.setProperty("Price", Price)
+                    p.setProperty("SourceUrl", SourceUrl)
+                    p.setProperty("ImagePath", ImagePath)
+                    p.setProperty("HashTitle", hashFaTitle)
+                    p.setProperty("Id", id)
+                    p.createRelationshipTo(site, RelationshipType { Relations.PRODUCT_IN_RS.toString() })
 
-            val enTitleQuery = """
-                   //English Title Chain
-                   MATCH (c:Product)
-                   WHERE c.Id = "$id"
-                   WITH reduce(t=trim(toLower(c.EnTitle)), delim in ["’", "'", "[", "]", "(", ")", "{", "}", "⟨", "⟩", ":", ",", "،", "、", "‒", "–", "—", "…", "...", "⋯", "᠁", "ฯ", "!", ".", "‹", "›", "«", "»", "‐", "-", "?", "‘", "’", "“", "”", "'", "'", '"', ";", "/", "·", "&", "*", "@", "\\", "•", " ^ ", "°", "”", "#", "÷", "×", "º", "ª", "%", "‰", "+", "−", "=", "‱", "¶", "′", "″", "‴", "§", "~", "_", "|", "‖", "¦", "©", "℗", "®", "℠", "،", "؟", "»", "«", "-", "؛", "..."] | replace(t,delim,"")) as normalized, c
-                   WITH split(normalized," ") as words, c
-                   UNWIND range(0,size(words)-2) as i
-                   MERGE(w3:Word {Title:words[i],Hash:dor.sha256(words[i]+i+c.Id)})
-                   MERGE(w4:Word {Title:words[i+1],Hash:dor.sha256(words[i+1]+(i+1)+c.Id)})
-                   CREATE (w3)-[:NEXT]->(w4)
-                   WITH c, words
-                   MATCH (w:Word {Hash:dor.sha256(words[0]+0+c.Id)})
-                   MERGE (c)-[:PRODUCT_HAS_ENGLISHTITLE]->(w)
-                   """.trimMargin()
+                    analyseProduct(p)
+//            var tempDesc = Description.toLowerCase().trim().replace("’", "").replace("'", "").replace("[", "").replace("]", "").replace("(", "").replace(")", "").replace("{", "").replace("}", "").replace("⟨", "").replace("⟩", "").replace(":", "").replace(",", "").replace("،", "").replace("、", "").replace("‒", "").replace("–", "").replace("—", "").replace("―", "").replace("…", "").replace("...", "").replace("⋯", "").replace("᠁", "").replace("ฯ", "").replace("!", "").replace("‹", "").replace("›", "").replace("«", "").replace("»", "").replace("‐", "").replace("-", "").replace("?", "").replace("‘", "").replace("’", "").replace("“", "").replace("”", "").replace("'", "").replace("'", "").replace("\"", "").replace(";", "").replace("/", "").replace("·", "").replace("&", "").replace("*", "").replace("@", "").replace("\\", "").replace("•", "").replace(" ^ ", "").replace("°", "").replace("”", "").replace("#", "").replace("÷", "").replace("×", "").replace("º", "").replace("ª", "").replace("%", "").replace("‰", "").replace("+", "").replace("−", "").replace("=", "").replace("‱", "").replace("¶", "").replace("′", "").replace("″", "").replace("‴", "").replace("§", "").replace("~", "").replace("_", "").replace("|", "").replace("‖", "").replace("¦", "").replace("©", "").replace("℗", "").replace("®", "").replace("℠", "").replace("،", "").replace("؟", "").replace("»", "").replace("«", "").replace("؛", "").replace("-", "").replace("...", "").replace("ً", "").replace("ٌ", "").replace("ٍ", "").replace("َ", "").replace("ُ", "").replace("ِ", "")
+//            val descQuery = """
+//                   //Description Chain
+//                   MATCH (c:Product)
+//                   WHERE c.Id = "$id"
+//                   WITH split("$tempDesc"," ") as words, c
+//                   UNWIND range(0,size(words)-2) as i
+//                   MERGE (w3:Word {Title:words[i],Hash:dor.sha256(words[i]+i+c.Id)})
+//                   MERGE (w4:Word {Title:words[i+1],Hash:dor.sha256(words[i+1]+(i+1)+c.Id)})
+//                   CREATE (w3)-[:NEXT]->(w4)
+//                   WITH c, words
+//                   MATCH (w:Word {Hash:dor.sha256(words[0]+0+c.Id)})
+//                   MERGE (c)-[:PRODUCT_HAS_DESCRIPTION]->(w)""".trimMargin()
+//
 
-            db.execute(descQuery)
-            db.execute(titleQuery)
-            db.execute(enTitleQuery)
+                }
 
-            analyseProduct(p)
-        } else {
-            analyseProduct(product)
+            } else {
+                analyseProduct(product)
+            }
+
+        } catch (e: Exception) {
+            log.info(e.message.toString())
         }
-        val t2 = System.currentTimeMillis()
-        log.info("here2 ${t2 - t1}")
+
     }
 
     @Procedure(name = "dor.defineProduct", mode = Mode.WRITE)
@@ -256,10 +264,9 @@ class ProcessData {
                 OPTIONAL MATCH (product)-[r7:BRANDDETECT_HAS_PRODUCT]-(:BrandDetect)
                 OPTIONAL MATCH (product)-[r8:PRODUCT_HAS_BRAND]-(:Brand)
                 OPTIONAL MATCH (product)<-[r9:PRODUCT_HAS_MAIN_BRAND]-(:Brand)
-                DELETE r,r2,r3,r4,r5,r6,r7,r8,r9
-                """.trimMargin()
+                DELETE r,r2,r3,r4,r5,r6,r7,r8,r9 """.trimMargin()
 
-//            val query = """
+//                       val query = """
 //                        //--------start match product and words--------
 //                        MATCH (product:Product {HashTitle:'${product.getProperty("HashTitle")}'})-[:PRODUCT_HAS_DESCRIPTION|:PRODUCT_HAS_PERSIANTITLE|:PRODUCT_HAS_ENGLISHTITLE]-(ww:Word)
 //                        WITH ww, product
@@ -343,10 +350,9 @@ class ProcessData {
 
             val query = """
                         //--------start match product and words--------
-                        MATCH (product:Product {HashTitle:'${product.getProperty("HashTitle")}'})-[:PRODUCT_HAS_DESCRIPTION|:PRODUCT_HAS_PERSIANTITLE|:PRODUCT_HAS_ENGLISHTITLE]-(ww:Word)
-                        WITH ww, product
-                        CALL apoc.path.subgraphNodes(ww,{ relationshipFilter:'NEXT>', labelFilter:'Word', filterStartNode:true, limit:-1}) yield node as w
-                        WITH collect(w.Title) as word, product
+                        MATCH (product:Product {HashTitle:'${product.getProperty("HashTitle")}'})
+                        WITH product, dor.replace(toString(product.Description + product.FaTitle + product.EnTitle + product.Spec)) as w
+                        WITH SPLIT(w, " ") as word, product
                         WITH reduce(v='|', x in word | v + x + '|') as arrayAsString, product
                         //--------end match product and words-------
                         //--------start match category by specdetect-------
@@ -379,10 +385,9 @@ class ProcessData {
                         //--------end create category and spec rels-------""".trimMargin()
 
             val queryBrand = """
-                          MATCH (product:Product {HashTitle:'${product.getProperty("HashTitle")}'})-[:PRODUCT_HAS_DESCRIPTION|:PRODUCT_HAS_PERSIANTITLE|:PRODUCT_HAS_ENGLISHTITLE]-(ww:Word)
-                          WITH ww, product
-                          CALL apoc.path.subgraphNodes(ww,{ relationshipFilter:'NEXT>', labelFilter:'Word', filterStartNode:true, limit:-1}) yield node as w
-                          WITH collect(w.Title) as word, product
+                          MATCH (product:Product {HashTitle:'${product.getProperty("HashTitle")}'})
+                          WITH product, dor.replace(toString(product.Description + product.FaTitle + product.EnTitle + product.Spec)) as w
+                          WITH SPLIT(w, " ") as word, product
                           WITH reduce(v='|', x in word | v + x + '|') as arrayAsString, product
                           //--------start match brand by branddetect-------
                           MATCH (s:SiteConfiguration)-[:BRAND_IN_SITE]-(c3:Brand)-[:BRANDDEDETECT_IN_BRAND]-(cd3:BrandDetect)
@@ -398,10 +403,9 @@ class ProcessData {
                           MERGE (cat3)-[:PRODUCT_HAS_MAIN_BRAND {DetectCount:wordCount3}]-(product)""".trimMargin()
 
             val queryFact = """
-                        MATCH (product:Product {HashTitle:'${product.getProperty("HashTitle")}'})-[:PRODUCT_HAS_DESCRIPTION|:PRODUCT_HAS_PERSIANTITLE|:PRODUCT_HAS_ENGLISHTITLE]-(ww:Word)
-                        WITH ww, product
-                        CALL apoc.path.subgraphNodes(ww,{ relationshipFilter:'NEXT>', labelFilter:'Word', filterStartNode:true, limit:-1}) yield node as w
-                        WITH collect(w.Title) as word, product
+                        MATCH (product:Product {HashTitle:'${product.getProperty("HashTitle")}'})
+                        WITH product, dor.replace(toString(product.Description + product.FaTitle + product.EnTitle + product.Spec)) as w
+                        WITH SPLIT(w, " ") as word, product
                         WITH reduce(v='|', x in word | v + x + '|') as arrayAsString, product
                         //--------start match fact by factdetect-------
                         MATCH (s:SiteConfiguration)-[:FACT_IN_SITE]-(c3:Fact)-[:FACTDETECT_IN_FACT]-(cd3:FactDetect)
