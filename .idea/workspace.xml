@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="77dd0837-d925-4bb7-baa7-7990c817fb33" name="Default" comment="Merge branch 'master' of https://github.com/doriumlab/dor_neo4j_rec into amirhosein&#10;&#10;# Conflicts:&#10;#&#9;.gitignore">
+    <list default="true" id="77dd0837-d925-4bb7-baa7-7990c817fb33" name="Default" comment="change">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/net/dor/neo4j/ProcessData.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/net/dor/neo4j/ProcessData.kt" afterDir="false" />
     </list>
@@ -18,8 +18,8 @@
       <file leaf-file-name="pom.xml" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/pom.xml">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="176">
-              <caret line="8" column="33" selection-start-line="8" selection-start-column="33" selection-end-line="8" selection-end-column="33" />
+            <state relative-caret-position="968">
+              <caret line="44" column="21" selection-start-line="44" selection-start-column="21" selection-end-line="44" selection-end-column="21" />
             </state>
           </provider>
         </entry>
@@ -27,29 +27,11 @@
       <file leaf-file-name="ProcessData.kt" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/net/dor/neo4j/ProcessData.kt">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="341">
-              <caret line="125" lean-forward="true" selection-start-line="125" selection-end-line="125" />
+            <state relative-caret-position="233">
+              <caret line="420" column="85" selection-start-line="420" selection-start-column="85" selection-end-line="420" selection-end-column="85" />
               <folding>
                 <element signature="e#19#1200#0" expanded="true" />
-                <element signature="n#!!block;n#Sha256Maker#0;n#!!block;n#ProcessData#0" />
-                <element signature="n#!!block;n#counter#0;n#!!block;n#ProcessData#0" />
-                <element signature="n#!!block;n#defineAllProducts#0;n#!!block;n#ProcessData#0" />
-                <element signature="n#!!block;n#defineProductBrand#0;n#!!block;n#ProcessData#0" />
-                <element signature="n#!!block;n#defineProductCategory#0;n#!!block;n#ProcessData#0" />
-                <element signature="n#!!block;n#defineProductFact#0;n#!!block;n#ProcessData#0" />
-                <element signature="n#!!block;n#analyseAllProduct#0;n#!!block;n#ProcessData#0" />
-                <element signature="n#!!block;n#deleteProductRelation#0;n#!!block;n#ProcessData#0" />
-                <element signature="n#!!block;n#EngineLable#0" />
               </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name=".gitignore" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/.gitignore">
-          <provider selected="true" editor-type-id="text-editor">
-            <state>
-              <caret column="20" selection-start-column="20" selection-end-column="20" />
             </state>
           </provider>
         </entry>
@@ -60,9 +42,19 @@
     <findStrings>
       <find>array</find>
       <find>log.info</find>
-      <find>adt</find>
       <find>covertToSHA256</find>
+      <find>adt</find>
+      <find>newquery</find>
+      <find>string.Empty</find>
+      <find>&quot;.&quot;</find>
+      <find>&quot;  &quot;</find>
+      <find>Replace</find>
+      <find>dor.replace</find>
     </findStrings>
+    <replaceStrings>
+      <replace>&quot;&quot;</replace>
+      <replace>replace</replace>
+    </replaceStrings>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -91,6 +83,17 @@
       </MavenImportingSettings>
     </option>
   </component>
+  <component name="MavenProjectNavigator">
+    <treeState>
+      <expand>
+        <path>
+          <item name="" type="16c1761:MavenProjectsStructure$RootNode" />
+          <item name="nansp" type="9519ce18:MavenProjectsStructure$ProjectNode" />
+        </path>
+      </expand>
+      <select />
+    </treeState>
+  </component>
   <component name="ProjectFrameBounds" extendedState="6">
     <option name="x" value="250" />
     <option name="y" value="370" />
@@ -105,9 +108,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
-      <pane id="AndroidView" />
-      <pane id="PackagesPane" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -118,44 +118,21 @@
             <path>
               <item name="dor_neo4j_rec" type="b2602c69:ProjectViewProjectNode" />
               <item name="dor_neo4j_rec" type="462c0819:PsiDirectoryNode" />
-              <item name=".idea" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="dor_neo4j_rec" type="b2602c69:ProjectViewProjectNode" />
-              <item name="dor_neo4j_rec" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="dor_neo4j_rec" type="b2602c69:ProjectViewProjectNode" />
-              <item name="dor_neo4j_rec" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="dor_neo4j_rec" type="b2602c69:ProjectViewProjectNode" />
-              <item name="dor_neo4j_rec" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="462c0819:PsiDirectoryNode" />
-              <item name="net" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="dor_neo4j_rec" type="b2602c69:ProjectViewProjectNode" />
-              <item name="dor_neo4j_rec" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="462c0819:PsiDirectoryNode" />
-              <item name="net" type="462c0819:PsiDirectoryNode" />
-              <item name="neo4j" type="462c0819:PsiDirectoryNode" />
+              <item name="target" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
         </subPane>
       </pane>
+      <pane id="Scope" />
+      <pane id="PackagesPane" />
+      <pane id="AndroidView" />
     </panes>
   </component>
   <component name="PropertiesComponent">
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../dor_crawler" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="project.structure.last.edited" value="Modules" />
     <property name="project.structure.proportion" value="0.15" />
     <property name="project.structure.side.proportion" value="0.2" />
@@ -231,7 +208,36 @@
       <workItem from="1526107664273" duration="94996000" />
       <workItem from="1526544501489" duration="201000" />
       <workItem from="1526546952235" duration="17569000" />
-      <workItem from="1527838099245" duration="12606000" />
+      <workItem from="1527838099245" duration="22757000" />
+      <workItem from="1528105701774" duration="117000" />
+      <workItem from="1529482519881" duration="10117000" />
+      <workItem from="1529577766751" duration="2475000" />
+      <workItem from="1529754772271" duration="8240000" />
+      <workItem from="1529823148042" duration="26000" />
+      <workItem from="1529823548958" duration="401000" />
+      <workItem from="1529827677824" duration="9754000" />
+      <workItem from="1529845784186" duration="3998000" />
+      <workItem from="1529907890201" duration="2536000" />
+      <workItem from="1529917539232" duration="25568000" />
+      <workItem from="1530085773633" duration="1578000" />
+      <workItem from="1530092343021" duration="2261000" />
+      <workItem from="1530178408065" duration="2853000" />
+      <workItem from="1530969548873" duration="28000" />
+      <workItem from="1531123321837" duration="8795000" />
+      <workItem from="1531206516989" duration="14354000" />
+      <workItem from="1531390110789" duration="477000" />
+      <workItem from="1531390782414" duration="2434000" />
+      <workItem from="1531401527062" duration="641000" />
+      <workItem from="1532272511515" duration="333000" />
+      <workItem from="1532272969637" duration="1535000" />
+      <workItem from="1532331059434" duration="76000" />
+      <workItem from="1532332484529" duration="808000" />
+      <workItem from="1532345041107" duration="3166000" />
+      <workItem from="1532348770411" duration="4754000" />
+      <workItem from="1532431651282" duration="631000" />
+      <workItem from="1532594080097" duration="1441000" />
+      <workItem from="1532616123902" duration="934000" />
+      <workItem from="1533111478819" duration="6271000" />
     </task>
     <task id="LOCAL-00001" summary="add Define Product Category Method">
       <created>1525951751116</created>
@@ -289,11 +295,81 @@
       <option name="project" value="LOCAL" />
       <updated>1527698185234</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="Merge branch 'master' of https://github.com/doriumlab/dor_neo4j_rec into amirhosein&#10;&#10;# Conflicts:&#10;#&#9;.gitignore&#10;&#10;add product procedures">
+      <created>1527857167144</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1527857167144</updated>
+    </task>
+    <task id="LOCAL-00010" summary="Merge branch 'master' of https://github.com/doriumlab/dor_neo4j_rec into amirhosein&#10;&#10;# Conflicts:&#10;#&#9;.gitignore&#10;&#10;fixing bug in create product">
+      <created>1527945085677</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1527945085677</updated>
+    </task>
+    <task id="LOCAL-00011" summary="change category and fact analyse">
+      <created>1529509252019</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1529509252019</updated>
+    </task>
+    <task id="LOCAL-00012" summary="fix relation name in Category Analyse">
+      <created>1529577948837</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1529577948837</updated>
+    </task>
+    <task id="LOCAL-00013" summary="fix bug in analyse fact query">
+      <created>1529761494975</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1529761494975</updated>
+    </task>
+    <task id="LOCAL-00014" summary="fix bug in category query and separate delete relation in to new query">
+      <created>1529850940849</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1529850940849</updated>
+    </task>
+    <task id="LOCAL-00015" summary="Change Analyse query">
+      <created>1530019341925</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1530019341925</updated>
+    </task>
+    <task id="LOCAL-00016" summary="Seprate Analyse Sigle Product">
+      <created>1530181989223</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1530181989223</updated>
+    </task>
+    <task id="LOCAL-00017" summary="optimize create product query">
+      <created>1531139187025</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1531139187026</updated>
+    </task>
+    <task id="LOCAL-00018" summary="fix bug in query">
+      <created>1532614487904</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1532614487904</updated>
+    </task>
+    <option name="localTasksCounter" value="19" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="146328000" />
+    <option name="totallyTimeSpent" value="273081000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-7" y="-7" width="1481" height="878" extended-state="6" />
@@ -306,14 +382,14 @@
       <window_info anchor="bottom" id="Java Enterprise" order="7" weight="0.328877" />
       <window_info anchor="right" id="Capture Analysis" order="3" />
       <window_info anchor="bottom" id="Event Log" order="7" sideWeight="0.50035185" side_tool="true" weight="0.328877" />
-      <window_info anchor="right" id="Maven Projects" order="3" />
+      <window_info anchor="right" id="Maven Projects" order="3" weight="0.32934552" />
       <window_info anchor="bottom" id="Database Changes" order="7" show_stripe_button="false" />
       <window_info anchor="bottom" id="Version Control" order="7" weight="0.328877" />
       <window_info anchor="bottom" id="Run" order="2" />
       <window_info active="true" anchor="bottom" id="Terminal" order="7" sideWeight="0.49964812" visible="true" weight="0.26737967" />
       <window_info id="Capture Tool" order="2" />
       <window_info id="Designer" order="2" />
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.26038" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.19563687" />
       <window_info anchor="right" id="Database" order="3" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
@@ -321,14 +397,45 @@
       <window_info anchor="right" id="Theme Preview" order="3" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
-      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
+      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.24982406" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
-      <window_info anchor="bottom" id="Messages" order="7" weight="0.3281787" />
+      <window_info anchor="bottom" id="Messages" order="7" weight="0.3275401" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.3298969" />
     </layout>
+    <layout-to-restore>
+      <window_info anchor="right" id="Palette" order="3" />
+      <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
+      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.24982406" />
+      <window_info anchor="right" id="Capture Analysis" order="4" />
+      <window_info anchor="bottom" id="Run" order="2" />
+      <window_info anchor="right" id="Theme Preview" order="5" />
+      <window_info anchor="bottom" id="Java Enterprise" order="12" weight="0.328877" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.31104857" />
+      <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
+      <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
+      <window_info anchor="bottom" id="TODO" order="6" />
+      <window_info anchor="bottom" id="Database Changes" order="8" show_stripe_button="false" />
+      <window_info anchor="bottom" id="Version Control" order="7" weight="0.328877" />
+      <window_info id="Image Layers" order="2" />
+      <window_info id="Designer" order="3" />
+      <window_info id="UI Designer" order="4" />
+      <window_info anchor="bottom" id="Find" order="1" weight="0.3298969" />
+      <window_info anchor="right" id="Database" order="6" />
+      <window_info anchor="right" id="Palette&#9;" order="7" />
+      <window_info anchor="bottom" id="Terminal" order="9" sideWeight="0.49964812" visible="true" weight="0.26737967" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
+      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
+      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
+      <window_info anchor="bottom" id="Event Log" order="10" sideWeight="0.50035185" side_tool="true" weight="0.328877" />
+      <window_info id="Capture Tool" order="5" />
+      <window_info anchor="bottom" id="Message" order="0" />
+      <window_info anchor="bottom" id="Messages" order="11" weight="0.3281787" />
+      <window_info anchor="right" id="Maven Projects" order="8" />
+      <window_info id="Favorites" order="6" side_tool="true" />
+    </layout-to-restore>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="1" />
@@ -343,19 +450,21 @@
     <MESSAGE value="Merge branch 'master' of https://github.com/doriumlab/dor_neo4j_rec&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml&#10;#&#9;src/main/net/dor/neo4j/ProcessData.kt" />
     <MESSAGE value="change lab name." />
     <MESSAGE value="Merge branch 'master' of https://github.com/doriumlab/dor_neo4j_rec into amirhosein&#10;&#10;# Conflicts:&#10;#&#9;.gitignore" />
-    <option name="LAST_COMMIT_MESSAGE" value="Merge branch 'master' of https://github.com/doriumlab/dor_neo4j_rec into amirhosein&#10;&#10;# Conflicts:&#10;#&#9;.gitignore" />
+    <MESSAGE value="Merge branch 'master' of https://github.com/doriumlab/dor_neo4j_rec into amirhosein&#10;&#10;# Conflicts:&#10;#&#9;.gitignore&#10;&#10;add product procedures" />
+    <MESSAGE value="Merge branch 'master' of https://github.com/doriumlab/dor_neo4j_rec into amirhosein&#10;&#10;# Conflicts:&#10;#&#9;.gitignore&#10;&#10;fixing bug in create product" />
+    <MESSAGE value="change category and fact analyse" />
+    <MESSAGE value="fix relation name in Category Analyse" />
+    <MESSAGE value="fix bug in analyse fact query" />
+    <MESSAGE value="fix bug in category query and separate delete relation in to new query" />
+    <MESSAGE value="Change Analyse query" />
+    <MESSAGE value="Seprate Analyse Sigle Product" />
+    <MESSAGE value="optimize create product query" />
+    <MESSAGE value="fix bug in query" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix bug in query" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="kotlin-line">
-          <url>file://$PROJECT_DIR$/src/main/net/dor/neo4j/ProcessData.kt</url>
-          <line>213</line>
-          <properties />
-          <option name="timeStamp" value="6" />
-        </line-breakpoint>
-      </breakpoints>
-      <option name="time" value="7" />
+      <option name="time" value="19" />
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
@@ -370,18 +479,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="3146">
           <caret line="143" lean-forward="true" selection-start-line="143" selection-end-line="143" />
-          <folding>
-            <element signature="e#19#1200#0" expanded="true" />
-            <element signature="n#!!block;n#Sha256Maker#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#counter#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#defineAllProducts#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#defineProductBrand#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#defineProductCategory#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#defineProductFact#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#analyseAllProduct#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#deleteProductRelation#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#EngineLable#0" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -412,18 +509,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="383">
           <caret line="463" column="44" selection-start-line="463" selection-start-column="44" selection-end-line="463" selection-end-column="44" />
-          <folding>
-            <element signature="e#19#1200#0" expanded="true" />
-            <element signature="n#!!block;n#Sha256Maker#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#counter#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#defineAllProducts#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#defineProductBrand#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#defineProductCategory#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#defineProductFact#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#analyseAllProduct#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#deleteProductRelation#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#EngineLable#0" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -438,18 +523,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="2618">
           <caret line="140" column="40" selection-start-line="140" selection-start-column="40" selection-end-line="140" selection-end-column="40" />
-          <folding>
-            <element signature="e#19#1200#0" expanded="true" />
-            <element signature="n#!!block;n#Sha256Maker#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#counter#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#defineAllProducts#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#defineProductBrand#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#defineProductCategory#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#defineProductFact#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#analyseAllProduct#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#deleteProductRelation#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#EngineLable#0" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -464,18 +537,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="3146">
           <caret line="143" lean-forward="true" selection-start-line="143" selection-end-line="143" />
-          <folding>
-            <element signature="e#19#1200#0" expanded="true" />
-            <element signature="n#!!block;n#Sha256Maker#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#counter#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#defineAllProducts#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#defineProductBrand#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#defineProductCategory#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#defineProductFact#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#analyseAllProduct#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#deleteProductRelation#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#EngineLable#0" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -506,18 +567,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="115">
           <caret line="444" column="12" selection-start-line="444" selection-start-column="12" selection-end-line="444" selection-end-column="12" />
-          <folding>
-            <element signature="e#19#1200#0" expanded="true" />
-            <element signature="n#!!block;n#Sha256Maker#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#counter#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#defineAllProducts#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#defineProductBrand#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#defineProductCategory#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#defineProductFact#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#analyseAllProduct#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#deleteProductRelation#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#EngineLable#0" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -532,18 +581,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="3723">
           <caret line="371" column="9" selection-start-line="371" selection-start-column="9" selection-end-line="371" selection-end-column="9" />
-          <folding>
-            <element signature="e#19#1200#0" expanded="true" />
-            <element signature="n#!!block;n#Sha256Maker#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#counter#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#defineAllProducts#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#defineProductBrand#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#defineProductCategory#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#defineProductFact#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#analyseAllProduct#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#deleteProductRelation#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#EngineLable#0" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -558,18 +595,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="2618">
           <caret line="140" column="40" selection-start-line="140" selection-start-column="40" selection-end-line="140" selection-end-column="40" />
-          <folding>
-            <element signature="e#19#1200#0" expanded="true" />
-            <element signature="n#!!block;n#Sha256Maker#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#counter#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#defineAllProducts#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#defineProductBrand#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#defineProductCategory#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#defineProductFact#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#analyseAllProduct#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#deleteProductRelation#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#EngineLable#0" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -584,18 +609,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="3146">
           <caret line="143" lean-forward="true" selection-start-line="143" selection-end-line="143" />
-          <folding>
-            <element signature="e#19#1200#0" expanded="true" />
-            <element signature="n#!!block;n#Sha256Maker#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#counter#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#defineAllProducts#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#defineProductBrand#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#defineProductCategory#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#defineProductFact#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#analyseAllProduct#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#deleteProductRelation#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#EngineLable#0" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -620,18 +633,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-663">
           <caret line="30" column="30" lean-forward="true" selection-start-line="30" selection-start-column="30" selection-end-line="30" selection-end-column="30" />
-          <folding>
-            <element signature="e#19#1200#0" expanded="true" />
-            <element signature="n#!!block;n#Sha256Maker#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#counter#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#defineAllProducts#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#defineProductBrand#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#defineProductCategory#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#defineProductFact#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#analyseAllProduct#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#deleteProductRelation#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#EngineLable#0" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -646,18 +647,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="2618">
           <caret line="140" column="40" selection-start-line="140" selection-start-column="40" selection-end-line="140" selection-end-column="40" />
-          <folding>
-            <element signature="e#19#1200#0" expanded="true" />
-            <element signature="n#!!block;n#Sha256Maker#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#counter#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#defineAllProducts#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#defineProductBrand#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#defineProductCategory#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#defineProductFact#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#analyseAllProduct#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#deleteProductRelation#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#EngineLable#0" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -672,18 +661,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="3146">
           <caret line="143" lean-forward="true" selection-start-line="143" selection-end-line="143" />
-          <folding>
-            <element signature="e#19#1200#0" expanded="true" />
-            <element signature="n#!!block;n#Sha256Maker#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#counter#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#defineAllProducts#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#defineProductBrand#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#defineProductCategory#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#defineProductFact#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#analyseAllProduct#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#deleteProductRelation#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#EngineLable#0" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -714,18 +691,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="383">
           <caret line="463" column="44" selection-start-line="463" selection-start-column="44" selection-end-line="463" selection-end-column="44" />
-          <folding>
-            <element signature="e#19#1200#0" expanded="true" />
-            <element signature="n#!!block;n#Sha256Maker#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#counter#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#defineAllProducts#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#defineProductBrand#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#defineProductCategory#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#defineProductFact#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#analyseAllProduct#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#deleteProductRelation#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#EngineLable#0" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -740,18 +705,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="2618">
           <caret line="140" column="40" selection-start-line="140" selection-start-column="40" selection-end-line="140" selection-end-column="40" />
-          <folding>
-            <element signature="e#19#1200#0" expanded="true" />
-            <element signature="n#!!block;n#Sha256Maker#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#counter#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#defineAllProducts#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#defineProductBrand#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#defineProductCategory#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#defineProductFact#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#analyseAllProduct#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#deleteProductRelation#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#EngineLable#0" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -766,18 +719,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="3146">
           <caret line="143" lean-forward="true" selection-start-line="143" selection-end-line="143" />
-          <folding>
-            <element signature="e#19#1200#0" expanded="true" />
-            <element signature="n#!!block;n#Sha256Maker#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#counter#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#defineAllProducts#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#defineProductBrand#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#defineProductCategory#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#defineProductFact#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#analyseAllProduct#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#deleteProductRelation#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#EngineLable#0" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -797,13 +738,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/pom.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="176">
-          <caret line="8" column="33" selection-start-line="8" selection-start-column="33" selection-end-line="8" selection-end-column="33" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/.gitignore">
       <provider selected="true" editor-type-id="text-editor">
         <state>
@@ -811,21 +745,19 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/pom.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="968">
+          <caret line="44" column="21" selection-start-line="44" selection-start-column="21" selection-end-line="44" selection-end-column="21" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/net/dor/neo4j/ProcessData.kt">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="341">
-          <caret line="125" lean-forward="true" selection-start-line="125" selection-end-line="125" />
+        <state relative-caret-position="233">
+          <caret line="420" column="85" selection-start-line="420" selection-start-column="85" selection-end-line="420" selection-end-column="85" />
           <folding>
             <element signature="e#19#1200#0" expanded="true" />
-            <element signature="n#!!block;n#Sha256Maker#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#counter#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#defineAllProducts#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#defineProductBrand#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#defineProductCategory#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#defineProductFact#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#analyseAllProduct#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#deleteProductRelation#0;n#!!block;n#ProcessData#0" />
-            <element signature="n#!!block;n#EngineLable#0" />
           </folding>
         </state>
       </provider>

@@ -154,12 +154,12 @@ class ProcessData {
     }
 
     @Procedure(name = "dor.createProduct", mode = Mode.WRITE)
-    fun createProduct(@Name("FaTitle") FaTitle: String, @Name("EnTitle") EnTitle: String, @Name("Description") Description: String, @Name("Price") Price: Long, @Name("SourceURL") SourceUrl: String, @Name("ImagePath") ImagePath: String, @Name("Spec") Spec: String) {
+    fun createProduct(@Name("FaTitle") FaTitle: String, @Name("EnTitle") EnTitle: String, @Name("Description") Description: String, @Name("Price") Price: Long, @Name("SourceURL") SourceUrl: String, @Name("ImagePath") ImagePath: String, @Name("Spec") Spec: String,@Name("RsId") rsId: String) {
 
         try {
             val hashFaTitle = Sha256Maker(FaTitle)
             val product: Node? = db.findNode(EngineLable.productLabel(), "HashTitle", hashFaTitle)
-            val site: Node? = db.findNode(EngineLable.rsLabel(), "SiteId", "50cfc9e8-402b-495b-8ed4-66dcb2b3aadd")
+            val site: Node? = db.findNode(EngineLable.rsLabel(), "SiteId", rsId)
 
             if (product == null) {
                 var flag = false
@@ -200,7 +200,7 @@ class ProcessData {
                     p.setProperty("Id", id)
                     p.createRelationshipTo(site, RelationshipType { Relations.PRODUCT_IN_RS.toString() })
 
-                    analyseProduct(p)
+                    analyseProduct(p,rsId)
 //            var tempDesc = Description.toLowerCase().trim().replace("’", "").replace("'", "").replace("[", "").replace("]", "").replace("(", "").replace(")", "").replace("{", "").replace("}", "").replace("⟨", "").replace("⟩", "").replace(":", "").replace(",", "").replace("،", "").replace("、", "").replace("‒", "").replace("–", "").replace("—", "").replace("―", "").replace("…", "").replace("...", "").replace("⋯", "").replace("᠁", "").replace("ฯ", "").replace("!", "").replace("‹", "").replace("›", "").replace("«", "").replace("»", "").replace("‐", "").replace("-", "").replace("?", "").replace("‘", "").replace("’", "").replace("“", "").replace("”", "").replace("'", "").replace("'", "").replace("\"", "").replace(";", "").replace("/", "").replace("·", "").replace("&", "").replace("*", "").replace("@", "").replace("\\", "").replace("•", "").replace(" ^ ", "").replace("°", "").replace("”", "").replace("#", "").replace("÷", "").replace("×", "").replace("º", "").replace("ª", "").replace("%", "").replace("‰", "").replace("+", "").replace("−", "").replace("=", "").replace("‱", "").replace("¶", "").replace("′", "").replace("″", "").replace("‴", "").replace("§", "").replace("~", "").replace("_", "").replace("|", "").replace("‖", "").replace("¦", "").replace("©", "").replace("℗", "").replace("®", "").replace("℠", "").replace("،", "").replace("؟", "").replace("»", "").replace("«", "").replace("؛", "").replace("-", "").replace("...", "").replace("ً", "").replace("ٌ", "").replace("ٍ", "").replace("َ", "").replace("ُ", "").replace("ِ", "")
 //            val descQuery = """
 //                   //Description Chain
@@ -219,7 +219,7 @@ class ProcessData {
                 }
 
             } else {
-                analyseProduct(product)
+                analyseProduct(product,rsId)
             }
 
         } catch (e: Exception) {
@@ -229,10 +229,10 @@ class ProcessData {
     }
 
     @Procedure(name = "dor.defineProduct", mode = Mode.WRITE)
-    fun defineProduct(@Name("HashTitle") hashTitle: String) {
+    fun defineProduct(@Name("HashTitle") hashTitle: String,@Name("RsId") rsId: String) {
 
         val product: Node = db.findNode(EngineLable.productLabel(), "HashTitle", hashTitle)
-        analyseProduct(product)
+        analyseProduct(product, rsId)
 
     }
 
@@ -249,7 +249,7 @@ class ProcessData {
 
     }
 
-    private fun analyseProduct(product: Node): Boolean {
+    private fun analyseProduct(product: Node,rsId :String): Boolean {
 
         try {
 
@@ -362,7 +362,8 @@ class ProcessData {
                         WITH splitSpd, reduce(v='|', x in splitSpd | v + x + '|') as testAsString, spd, product, arrayAsString
                         WHERE arrayAsString CONTAINS testAsString
                         WITH DISTINCT spd, product, arrayAsString
-                        MATCH (spd)-[:SPECDETECT_IN_SPEC]-(:Spec)-[:SPEC_HAS_CATEGORY]-(rp:RPCategory)
+                        MATCH (spd)-[:SPECDETECT_IN_SPEC]-(:Spec)-[:SPEC_HAS_CATEGORY]-(rp:RPCategory)-[:RPC_IS_RPC_CHILD*0..]->(:RPCategory)-[:RP_CATEGORY_IN_RS]-(rs:RS)
+                        WHERE rs.SiteId = "$rsId"
                         WITH collect(spd.Id) as detect3, rp, product, arrayAsString
                         //--------end match category by specdetect-------
                         //--------start match category by categorydetect-------
@@ -390,8 +391,8 @@ class ProcessData {
                           WITH SPLIT(w, " ") as word, product
                           WITH reduce(v='|', x in word | v + x + '|') as arrayAsString, product
                           //--------start match brand by branddetect-------
-                          MATCH (s:SiteConfiguration)-[:BRAND_IN_SITE]-(c3:Brand)-[:BRANDDEDETECT_IN_BRAND]-(cd3:BrandDetect)
-                          WHERE s.SiteId = 'a462b94d-687f-486b-9595-065922b09d8b'
+                          MATCH (s:RS)-[:BRAND_IN_RS]-(c3:Brand)-[:BRANDDEDETECT_IN_BRAND]-(cd3:BrandDetect)
+                          WHERE s.SiteId = "$rsId"
                           WITH split(cd3.Title," ") as d3, c3, cd3, arrayAsString, product
                           WITH d3,reduce(v='|', x in d3 | v + x + '|') as testAsString, cd3, c3, product, arrayAsString
                           WHERE arrayAsString CONTAINS testAsString
