@@ -29,6 +29,8 @@ import javax.swing.text.StyledEditorKit
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 import java.util.UUID
+import org.neo4j.cypher.internal.`InternalExecutionResult$class`.columns
+import org.neo4j.graphdb.QueryExecutionType.query
 
 
 private class Sha256Hash {
@@ -154,7 +156,7 @@ class ProcessData {
     }
 
     @Procedure(name = "dor.createProduct", mode = Mode.WRITE)
-    fun createProduct(@Name("FaTitle") FaTitle: String, @Name("EnTitle") EnTitle: String, @Name("Description") Description: String, @Name("Price") Price: Long, @Name("SourceURL") SourceUrl: String, @Name("ImagePath") ImagePath: String, @Name("Spec") Spec: String,@Name("RsId") rsId: String) {
+    fun createProduct(@Name("FaTitle") FaTitle: String, @Name("EnTitle") EnTitle: String, @Name("Description") Description: String, @Name("Price") Price: Long, @Name("SourceURL") SourceUrl: String, @Name("ImagePath") ImagePath: String, @Name("Spec") Spec: String, @Name("RsId") rsId: String) {
 
         try {
             val hashFaTitle = Sha256Maker(FaTitle)
@@ -200,7 +202,7 @@ class ProcessData {
                     p.setProperty("Id", id)
                     p.createRelationshipTo(site, RelationshipType { Relations.PRODUCT_IN_RS.toString() })
 
-                    analyseProduct(p,rsId)
+                    analyseProduct(p, rsId)
 //            var tempDesc = Description.toLowerCase().trim().replace("’", "").replace("'", "").replace("[", "").replace("]", "").replace("(", "").replace(")", "").replace("{", "").replace("}", "").replace("⟨", "").replace("⟩", "").replace(":", "").replace(",", "").replace("،", "").replace("、", "").replace("‒", "").replace("–", "").replace("—", "").replace("―", "").replace("…", "").replace("...", "").replace("⋯", "").replace("᠁", "").replace("ฯ", "").replace("!", "").replace("‹", "").replace("›", "").replace("«", "").replace("»", "").replace("‐", "").replace("-", "").replace("?", "").replace("‘", "").replace("’", "").replace("“", "").replace("”", "").replace("'", "").replace("'", "").replace("\"", "").replace(";", "").replace("/", "").replace("·", "").replace("&", "").replace("*", "").replace("@", "").replace("\\", "").replace("•", "").replace(" ^ ", "").replace("°", "").replace("”", "").replace("#", "").replace("÷", "").replace("×", "").replace("º", "").replace("ª", "").replace("%", "").replace("‰", "").replace("+", "").replace("−", "").replace("=", "").replace("‱", "").replace("¶", "").replace("′", "").replace("″", "").replace("‴", "").replace("§", "").replace("~", "").replace("_", "").replace("|", "").replace("‖", "").replace("¦", "").replace("©", "").replace("℗", "").replace("®", "").replace("℠", "").replace("،", "").replace("؟", "").replace("»", "").replace("«", "").replace("؛", "").replace("-", "").replace("...", "").replace("ً", "").replace("ٌ", "").replace("ٍ", "").replace("َ", "").replace("ُ", "").replace("ِ", "")
 //            val descQuery = """
 //                   //Description Chain
@@ -219,7 +221,7 @@ class ProcessData {
                 }
 
             } else {
-                analyseProduct(product,rsId)
+                analyseProduct(product, rsId)
             }
 
         } catch (e: Exception) {
@@ -229,7 +231,7 @@ class ProcessData {
     }
 
     @Procedure(name = "dor.defineProduct", mode = Mode.WRITE)
-    fun defineProduct(@Name("HashTitle") hashTitle: String,@Name("RsId") rsId: String) {
+    fun defineProduct(@Name("HashTitle") hashTitle: String, @Name("RsId") rsId: String) {
 
         val product: Node = db.findNode(EngineLable.productLabel(), "HashTitle", hashTitle)
         analyseProduct(product, rsId)
@@ -249,7 +251,7 @@ class ProcessData {
 
     }
 
-    private fun analyseProduct(product: Node,rsId :String): Boolean {
+    private fun analyseProduct(product: Node, rsId: String): Boolean {
 
         try {
 
@@ -264,7 +266,8 @@ class ProcessData {
                 OPTIONAL MATCH (product)-[r7:BRANDDETECT_HAS_PRODUCT]-(:BrandDetect)
                 OPTIONAL MATCH (product)-[r8:PRODUCT_HAS_BRAND]-(:Brand)
                 OPTIONAL MATCH (product)<-[r9:PRODUCT_HAS_MAIN_BRAND]-(:Brand)
-                DELETE r,r2,r3,r4,r5,r6,r7,r8,r9 """.trimMargin()
+                OPTIONAL MATCH (product)-[r10:SPEC_HAS_PRODUCT]->(:Spec)
+                DELETE r,r2,r3,r4,r5,r6,r7,r8,r9,r10""".trimMargin()
 
 //                       val query = """
 //                        //--------start match product and words--------
@@ -347,8 +350,9 @@ class ProcessData {
 //                           //WITH dor.counter(cd3.Title,toString(normalizedDesc + " " + normalizedFaTitle + " " + normalizedEnTitle)) as dd, cd3, c3, p
 //                           WITH sum(dd) as wordCount3, c3 as cat3, p
 //                           MERGE (p)-[:FACT_HAS_PRODUCT {DetectCount:wordCount3}]-(cat3)""".trimMargin()
-
-            val query = """
+            db.execute(queryDelete)
+            var hasSpec = false
+            var query = """
                         //--------start match product and words--------
                         MATCH (product:Product {HashTitle:'${product.getProperty("HashTitle")}'})
                         WITH product, dor.replace(toString(product.Description + product.FaTitle + product.EnTitle + product.Spec)) as w
@@ -356,12 +360,36 @@ class ProcessData {
                         WITH reduce(v='|', x in word | v + x + '|') as arrayAsString, product
                         //--------end match product and words-------
                         //--------start match category by specdetect-------
-                        MATCH (s:SiteConfiguration)-[:SPECDETECT_IN_SITE]-(spd:SpecDetect)-[:SPECDETECT_IN_SPEC]-(spec:Spec)
+                        MATCH (s:SiteConfiguration)-[:SPECDETECT_IN_SITE]-(spd:SpecDetect)-[:SPECDETECT_IN_SPEC]-(:Spec)
                         WHERE s.SiteId = 'a462b94d-687f-486b-9595-065922b09d8b'
                         WITH split(spd.Title," ") as splitSpd, spd, arrayAsString, product
                         WITH splitSpd, reduce(v='|', x in splitSpd | v + x + '|') as testAsString, spd, product, arrayAsString
                         WHERE arrayAsString CONTAINS testAsString
                         WITH DISTINCT spd, product, arrayAsString
+                        RETURN spd""".trimMargin()
+            db.execute(query)
+
+            db.execute(query).use({ result ->
+                if (result.hasNext()) {
+                    hasSpec = true
+                }
+            })
+
+            if (hasSpec) {
+                val queryCat = """
+                      //--------start match product and words--------
+                        MATCH (product:Product {HashTitle:'${product.getProperty("HashTitle")}'})
+                        WITH product, dor.replace(toString(product.Description + product.FaTitle + product.EnTitle + product.Spec)) as w
+                        WITH SPLIT(w, " ") as word, product
+                        WITH reduce(v='|', x in word | v + x + '|') as arrayAsString, product
+                        //--------end match product and words-------
+                        MATCH (s:SiteConfiguration)-[:SPECDETECT_IN_SITE]-(spd:SpecDetect)-[:SPECDETECT_IN_SPEC]-(:Spec)
+                        WHERE s.SiteId = 'a462b94d-687f-486b-9595-065922b09d8b'
+                        WITH split(spd.Title," ") as splitSpd, spd, arrayAsString, product
+                        WITH splitSpd, reduce(v='|', x in splitSpd | v + x + '|') as testAsString, spd, product, arrayAsString
+                        WHERE arrayAsString CONTAINS testAsString
+                        WITH DISTINCT spd, product, arrayAsString
+                        //--------start match category by specdetect-------
                         MATCH (spd)-[:SPECDETECT_IN_SPEC]-(:Spec)-[:SPEC_HAS_CATEGORY]-(rp:RPCategory)-[:RPC_IS_RPC_CHILD*0..]->(:RPCategory)-[:RP_CATEGORY_IN_RS]-(rs:RS)
                         WHERE rs.SiteId = "$rsId"
                         WITH collect(spd.Id) as detect3, rp, product, arrayAsString
@@ -380,10 +408,35 @@ class ProcessData {
                         WITH sumCd, rp2, product, detect3, arrayAsString ORDER BY sumCd DESC limit 1
                         MERGE (rp2)-[:PRODUCT_HAS_MAIN_RPCATEGORY {DetectCount:sumCd}]-(product)
                         WITH detect3, product, rp2, arrayAsString
-                        MATCH (cd3:SpecDetect)-[:SPECDETECT_IN_SPEC]-(:Spec)-[:SPEC_HAS_CATEGORY]-(rp2)
+                        MATCH (cd3:SpecDetect)-[:SPECDETECT_IN_SPEC]-(spec:Spec)-[:SPEC_HAS_CATEGORY]-(rp2)
                         WHERE cd3.Id IN detect3
                         MERGE (product)-[r5:SPECDETECT_HAS_PRODUCT]->(cd3)
+                        MERGE (product)-[r6:SPEC_HAS_PRODUCT]->(spec)
                         //--------end create category and spec rels-------""".trimMargin()
+
+                db.execute(queryCat)
+            } else {
+                val queryCat = """
+                          MATCH (product:Product {HashTitle:'${product.getProperty("HashTitle")}'})
+                          WITH product, dor.replace(toString(product.Description + product.FaTitle + product.EnTitle + product.Spec)) as w
+                          WITH SPLIT(w, " ") as word, product
+                          WITH reduce(v='|', x in word | v + x + '|') as arrayAsString, product
+                          //--------start match brand by branddetect-------
+                          MATCH (s:RS)-[:RP_CATEGORY_IN_RS]-(:RPCategory)-[:RPC_IS_RPC_CHILD*0..]-(c3:RPCategory)-[:CATEGORYDETECT_IN_RPCATEGORY]-(cd3:CategoryDetect)
+                          WHERE s.SiteId = "$rsId"
+                          WITH split(cd3.Title," ") as d3, c3, cd3, arrayAsString, product
+                          WITH d3,reduce(v='|', x in d3 | v + x + '|') as testAsString, cd3, c3, product, arrayAsString
+                          WHERE arrayAsString CONTAINS testAsString
+                          WITH length(split(replace(arrayAsString,testAsString,"@"), "@"))-1 as dd, cd3, c3, product, arrayAsString
+                          MERGE (product)-[:CATEGORYDETECT_HAS_PRODUCT {DetectCount:dd}]-(cd3)
+                          WITH sum(dd) as wordCount3, c3 as cat3, product, arrayAsString
+                          MERGE (product)-[:RP_CATEGORY_HAS_PRODUCT {DetectCount:wordCount3}]-(cat3)
+                          WITH wordCount3, cat3, product, arrayAsString order by wordCount3 DESC limit 1
+                          MERGE (cat3)-[:PRODUCT_HAS_MAIN_RPCATEGORY {DetectCount:wordCount3}]-(product)""".trimMargin()
+
+                db.execute(queryCat)
+            }
+
 
             val queryBrand = """
                           MATCH (product:Product {HashTitle:'${product.getProperty("HashTitle")}'})
@@ -420,8 +473,9 @@ class ProcessData {
                         MERGE (product)-[:FACT_HAS_PRODUCT {DetectCount:wordCount3}]-(cat3)
                         //--------end match fact by factdetect-------""".trimMargin()
 
-            db.execute(queryDelete)
-            db.execute(query)
+
+            // db.execute(query)
+
             db.execute(queryBrand)
             db.execute(queryFact)
 
