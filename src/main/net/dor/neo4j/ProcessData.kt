@@ -362,7 +362,8 @@ class ProcessData {
                         //--------start match category by specdetect-------
                         MATCH (s:SiteConfiguration)-[:SPECDETECT_IN_SITE]-(spd:SpecDetect)-[:SPECDETECT_IN_SPEC]-(:Spec)
                         WHERE s.SiteId = 'a462b94d-687f-486b-9595-065922b09d8b'
-                        WITH split(spd.Title," ") as splitSpd, spd, arrayAsString, product
+                        WITH dor.replace(spd.Title) as rp, spd, product, arrayAsString
+                        WITH split(rp," ") as splitSpd, spd, arrayAsString, product
                         WITH splitSpd, reduce(v='|', x in splitSpd | v + x + '|') as testAsString, spd, product, arrayAsString
                         WHERE arrayAsString CONTAINS testAsString
                         WITH DISTINCT spd, product, arrayAsString
@@ -385,7 +386,8 @@ class ProcessData {
                         //--------end match product and words-------
                         MATCH (s:SiteConfiguration)-[:SPECDETECT_IN_SITE]-(spd:SpecDetect)-[:SPECDETECT_IN_SPEC]-(:Spec)
                         WHERE s.SiteId = 'a462b94d-687f-486b-9595-065922b09d8b'
-                        WITH split(spd.Title," ") as splitSpd, spd, arrayAsString, product
+                        WITH dor.replace(spd.Title) as rp, spd, product, arrayAsString
+                        WITH split(rp," ") as splitSpd, spd, arrayAsString, product
                         WITH splitSpd, reduce(v='|', x in splitSpd | v + x + '|') as testAsString, spd, product, arrayAsString
                         WHERE arrayAsString CONTAINS testAsString
                         WITH DISTINCT spd, product, arrayAsString
@@ -396,7 +398,8 @@ class ProcessData {
                         //--------end match category by specdetect-------
                         //--------start match category by categorydetect-------
                         MATCH (rp)-[:RPC_IS_RPC_CHILD*0..]->(rp2:RPCategory)-[:CATEGORYDETECT_IN_RPCATEGORY]-(cd:CategoryDetect)
-                        WITH split(cd.Title," ") as splitCd, cd, rp2, detect3, arrayAsString, product
+                        WITH dor.replace(cd.Title) as cdd, cd, rp2, rp, product, detect3, arrayAsString
+                        WITH split(cdd," ") as splitCd, cd, rp2, detect3, arrayAsString, product
                         WITH splitCd, reduce(v='|', x in splitCd | v + x + '|') as testAsString, cd, rp2, product, detect3, arrayAsString
                         WHERE arrayAsString CONTAINS testAsString
                         WITH length(split(replace(arrayAsString,testAsString,"@"), "@")) -1 as dd, cd, rp2 , product, detect3, arrayAsString
@@ -424,7 +427,8 @@ class ProcessData {
                           //--------start match brand by branddetect-------
                           MATCH (s:RS)-[:RP_CATEGORY_IN_RS]-(:RPCategory)-[:RPC_IS_RPC_CHILD*0..]-(c3:RPCategory)-[:CATEGORYDETECT_IN_RPCATEGORY]-(cd3:CategoryDetect)
                           WHERE s.SiteId = "$rsId"
-                          WITH split(cd3.Title," ") as d3, c3, cd3, arrayAsString, product
+                          WITH dor.replace(cd3.Title) as cdd, cd3 ,c3, product, arrayAsString
+                          WITH split(cdd," ") as d3, c3, cd3, arrayAsString, product
                           WITH d3,reduce(v='|', x in d3 | v + x + '|') as testAsString, cd3, c3, product, arrayAsString
                           WHERE arrayAsString CONTAINS testAsString
                           WITH length(split(replace(arrayAsString,testAsString,"@"), "@"))-1 as dd, cd3, c3, product, arrayAsString
@@ -446,7 +450,8 @@ class ProcessData {
                           //--------start match brand by branddetect-------
                           MATCH (s:RS)-[:BRAND_IN_RS]-(c3:Brand)-[:BRANDDEDETECT_IN_BRAND]-(cd3:BrandDetect)
                           WHERE s.SiteId = "$rsId"
-                          WITH split(cd3.Title," ") as d3, c3, cd3, arrayAsString, product
+                          WITH dor.replace(cd3.Title) as cdd, c3, cd3, product, arrayAsString
+                          WITH split(cdd," ") as d3, c3, cd3, arrayAsString, product
                           WITH d3,reduce(v='|', x in d3 | v + x + '|') as testAsString, cd3, c3, product, arrayAsString
                           WHERE arrayAsString CONTAINS testAsString
                           WITH length(split(replace(arrayAsString,testAsString,"@"), "@"))-1 as dd, cd3, c3, product, arrayAsString
@@ -464,7 +469,8 @@ class ProcessData {
                         //--------start match fact by factdetect-------
                         MATCH (s:SiteConfiguration)-[:FACT_IN_SITE]-(c3:Fact)-[:FACTDETECT_IN_FACT]-(cd3:FactDetect)
                         WHERE s.SiteId = 'a462b94d-687f-486b-9595-065922b09d8b'
-                        WITH split(cd3.Title," ") as d3, c3, cd3, arrayAsString, product
+                        WITH dor.replace(cd3.Title) as cdd, c3, cd3, product, arrayAsString
+                        WITH split(cdd," ") as d3, c3, cd3, arrayAsString, product
                         WITH d3,reduce(v='|', x in d3 | v + x + '|') as testAsString, cd3, c3, product, arrayAsString
                         WHERE arrayAsString CONTAINS testAsString
                         WITH length(split(replace(arrayAsString,testAsString,"@"), "@"))-1 as dd, cd3, c3, product, arrayAsString
